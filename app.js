@@ -133,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Sidebar Actions
     btnPrint: document.getElementById('btn-print'),
+    btnSharePdf: document.getElementById('btn-share-pdf'),
     btnPreviewMode: document.getElementById('btn-preview-mode'),
     btnSaveJson: document.getElementById('btn-save-json'),
     loadJsonFile: document.getElementById('load-json-file'),
@@ -1235,7 +1236,223 @@ document.addEventListener('DOMContentLoaded', () => {
     DOM.btnRemoveSig
   );
 
+  // ----------------------------------------------------
+  // 13. Fit invoice to a single A4 page when printing
+  // ----------------------------------------------------
+  // Content length varies (few items vs many), so instead of hoping it
+  // naturally fits, we measure the rendered invoice just before printing
+  // and shrink it down (if needed) so it always lands on one A4 sheet.
+  function fitInvoiceToPrintPage() {
+    const card = document.getElementById('invoice-card');
+    if (!card) return;
+
+    // Reset any previous scaling before re-measuring
+    card.style.transform = 'none';
+    card.style.transformOrigin = 'top left';
+    card.style.marginBottom = '0px';
+
+    // A4 = 210mm x 297mm. Print margins are set to 12mm on all sides
+    // in the @page rule, so usable content area is 186mm x 273mm.
+    const MM_TO_PX = 3.7795275591; // 96dpi conversion
+    const pageWidthPx = 186 * MM_TO_PX;
+    const pageHeightPx = 273 * MM_TO_PX;
+
+    const cardWidth = card.scrollWidth;
+    const cardHeight = card.scrollHeight;
+
+    if (!cardWidth || !cardHeight) return;
+
+    const scaleX = pageWidthPx / cardWidth;
+    const scaleY = pageHeightPx / cardHeight;
+    const scale = Math.min(scaleX, scaleY, 1); // never scale up, only shrink
+
+    if (scale < 1) {
+      card.style.transform = `scale(${scale})`;
+      // A scaled element still reserves its original, un-scaled space in
+      // normal flow, which would otherwise push out a blank second page.
+      // Pull that reserved space back in with a compensating negative margin.
+      const heightDiff = cardHeight - (cardHeight * scale);
+      card.style.marginBottom = `-${heightDiff}px`;
+    }
+  }
+
+  function resetInvoicePrintScale() {
+    const card = document.getElementById('invoice-card');
+    if (!card) return;
+    card.style.transform = '';
+    card.style.transformOrigin = '';
+    card.style.marginBottom = '';
+  }
+
+  window.addEventListener('beforeprint', fitInvoiceToPrintPage);
+  window.addEventListener('afterprint', resetInvoicePrintScale);
+
+  // Safari (including iOS) doesn't reliably fire beforeprint/afterprint,
+  // so fall back to matchMedia('print') which Safari does support.
+  if (window.matchMedia) {
+    const printMediaQuery = window.matchMedia('print');
+    const handlePrintChange = (mq) => {
+      if (mq.matches) {
+        fitInvoiceToPrintPage();
+      } else {
+        resetInvoicePrintScale();
+      }
+    };
+    if (printMediaQuery.addEventListener) {
+      printMediaQuery.addEventListener('change', handlePrintChange);
+    } else if (printMediaQuery.addListener) {
+      // Older Safari
+      printMediaQuery.addListener(handlePrintChange);
+    }
+  }
+
+  // Also fit right before the in-app Print/Save PDF button triggers print,
+  // so the very first print dialog paint is already correctly scaled.
+  if (DOM.btnPrint) {
+    DOM.btnPrint.addEventListener('click', () => {
+      fitInvoiceToPrintPage();
+    });
+  }
+
   // Initial sync & load
   loadStateFromLocalStorage();
   syncStateToDOM();
+
+  // ----------------------------------------------------
+  // 14. Share as PDF (WhatsApp / Viber / any share-sheet app)
+  // ----------------------------------------------------
+  // This is deliberately separate from the Print flow above: it never opens
+  // the browser print dialog. It renders the invoice straight to a one-page
+  // A4 PDF in memory and hands it to the OS share sheet (or downloads it as
+  // a fallback), so it works well from a phone tapping "Share to WhatsApp".
+
+  function showToast(message, isError) {
+    let toast = document.getElementById('app-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'app-toast';
+      toast.style.cssText = `
+        position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+        color: #fff; padding: 10px 18px; border-radius: 8px; font-size: 0.85rem;
+        z-index: 9999; box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+        opacity: 0; transition: opacity 0.25s ease; max-width: 90vw; text-align: center;
+        pointer-events: none;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.style.background = isError ? '#dc2626' : '#1f2937';
+    toast.textContent = message;
+    requestAnimationFrame(() => { toast.style.opacity = '1'; });
+    clearTimeout(toast._hideTimer);
+    toast._hideTimer = setTimeout(() => { toast.style.opacity = '0'; }, 3200);
+  }
+
+  async function generateInvoicePdfBlob() {
+    const card = document.getElementById('invoice-card');
+    if (!card) throw new Error('Invoice element not found');
+    if (!window.html2canvas || !window.jspdf) {
+      throw new Error('PDF library failed to load (check your internet connection)');
+    }
+
+    const wasPreview = document.body.classList.contains('preview-mode-active');
+    document.body.classList.add('preview-mode-active', 'capturing-pdf');
+
+    // Clear any leftover scale/margin from a previous print
+    card.style.transform = 'none';
+    card.style.marginBottom = '0px';
+
+    // Let layout settle after the class changes before screenshotting
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+    try {
+      const canvas = await window.html2canvas(card, {
+        scale: Math.min(window.devicePixelRatio || 1, 2) * 1.5,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 12; // matches the @page margin used for printing
+      const maxWidth = pageWidth - margin * 2;
+      const maxHeight = pageHeight - margin * 2;
+
+      const imgRatio = canvas.width / canvas.height;
+      let renderWidth = maxWidth;
+      let renderHeight = renderWidth / imgRatio;
+      if (renderHeight > maxHeight) {
+        renderHeight = maxHeight;
+        renderWidth = renderHeight * imgRatio;
+      }
+
+      const x = (pageWidth - renderWidth) / 2;
+      const y = margin;
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      pdf.addImage(imgData, 'JPEG', x, y, renderWidth, renderHeight, undefined, 'FAST');
+
+      return pdf.output('blob');
+    } finally {
+      document.body.classList.remove('capturing-pdf');
+      if (!wasPreview) {
+        document.body.classList.remove('preview-mode-active');
+      }
+    }
+  }
+
+  async function handleSharePdf() {
+    if (!DOM.btnSharePdf) return;
+
+    const originalHTML = DOM.btnSharePdf.innerHTML;
+    DOM.btnSharePdf.disabled = true;
+    DOM.btnSharePdf.innerHTML = '<span class="spinner"></span> Preparing PDF...';
+
+    try {
+      const blob = await generateInvoicePdfBlob();
+      const safeNumber = (state.meta.number || 'draft').replace(/[^a-z0-9-_]+/gi, '');
+      const filename = `Invoice-${safeNumber}.pdf`;
+      const file = new File([blob], filename, { type: 'application/pdf' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        // Native share sheet: on mobile this lists WhatsApp, Viber, Mail,
+        // AirDrop, etc. directly, with the PDF already attached.
+        await navigator.share({
+          files: [file],
+          title: state.meta.title || 'Invoice',
+          text: `Invoice ${state.meta.number || ''} from ${state.company.name || ''}`.trim()
+        });
+      } else {
+        // Desktop or unsupported browser: just download it, ready to
+        // attach manually in WhatsApp Web / Viber Desktop.
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        showToast('PDF downloaded — attach it in WhatsApp / Viber to share.');
+      }
+    } catch (err) {
+      if (err && err.name === 'AbortError') {
+        // User closed the native share sheet without picking an app — fine, do nothing
+      } else {
+        console.error('Share PDF failed', err);
+        showToast('Could not generate the PDF. Please try again.', true);
+      }
+    } finally {
+      DOM.btnSharePdf.disabled = false;
+      DOM.btnSharePdf.innerHTML = originalHTML;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
+
+  if (DOM.btnSharePdf) {
+    DOM.btnSharePdf.addEventListener('click', handleSharePdf);
+  }
 });
