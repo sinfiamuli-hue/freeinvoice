@@ -2,7 +2,11 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#2563eb">
   <title>Professional Invoice Maker - Production Quality</title>
   <!-- SEO Tags -->
   <meta name="description" content="Generate professional, customizable business invoices online. Dynamic styling templates, PDF export, automatic calculations, and dark mode support.">
@@ -17,6 +21,10 @@
   
   <!-- Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- PDF generation (used by the Share PDF button) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -45,6 +53,9 @@
         <div class="actions-grid">
           <button class="btn btn-primary" id="btn-print">
             <i data-lucide="printer"></i> Print / Save PDF
+          </button>
+          <button class="btn btn-share" id="btn-share-pdf">
+            <i data-lucide="share-2"></i> Share PDF (WhatsApp/Viber)
           </button>
           <button class="btn btn-secondary" id="btn-preview-mode">
             <i data-lucide="eye"></i> Toggle Preview
