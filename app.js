@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
       terms: 'Net 30',
       poNumber: 'PO-998877',
       refNumber: 'REF-654',
-      currency: 'USD',
+      currency: 'MVR',
       customCurrencySymbol: ''
     },
     
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (code === 'CUSTOM') {
       return state.meta.customCurrencySymbol || '';
     }
-    return currencies[code] || '$';
+    return currencies[code] || 'Rf';
   }
 
   // Format currency value safely
