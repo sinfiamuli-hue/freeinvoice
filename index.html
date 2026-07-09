@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Professional Invoice Maker - Production Quality</title>
+  <!-- SEO Tags -->
+  <meta name="description" content="Generate professional, customizable business invoices online. Dynamic styling templates, PDF export, automatic calculations, and dark mode support.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- App Shell -->
+  <div class="app-layout">
+    
+    <!-- Sidebar Controls -->
+    <aside class="sidebar no-print" id="control-panel">
+      <div class="sidebar-header">
+        <div class="app-brand">
+          <i data-lucide="file-text" class="brand-icon"></i>
+          <div>
+            <h1>Invoicely</h1>
+            <p>Professional Invoice Engine</p>
+          </div>
+        </div>
+        <button class="theme-toggle-btn" id="theme-toggle" title="Toggle Light/Dark Mode">
+          <i data-lucide="moon" class="theme-icon-dark"></i>
+          <i data-lucide="sun" class="theme-icon-light"></i>
+        </button>
+      </div>
+
+      <!-- Action Panel -->
+      <div class="sidebar-section">
+        <h3>Actions</h3>
+        <div class="actions-grid">
+          <button class="btn btn-primary" id="btn-print">
+            <i data-lucide="printer"></i> Print / Save PDF
+          </button>
+          <button class="btn btn-secondary" id="btn-preview-mode">
+            <i data-lucide="eye"></i> Toggle Preview
+          </button>
+          <button class="btn btn-outline" id="btn-save-json">
+            <i data-lucide="download"></i> Save Progress (JSON)
+          </button>
+          <label class="btn btn-outline file-upload-label" for="load-json-file">
+            <i data-lucide="upload"></i> Load JSON
+            <input type="file" id="load-json-file" accept=".json" style="display: none;">
+          </label>
+          <button class="btn btn-outline" id="btn-duplicate">
+            <i data-lucide="copy"></i> Duplicate Invoice
+          </button>
+          <button class="btn btn-danger-outline" id="btn-clear">
+            <i data-lucide="trash-2"></i> Clear Invoice
+          </button>
+        </div>
+      </div>
+
+      <!-- Theme Customizer -->
+      <div class="sidebar-section">
+        <h3>Design Customizer</h3>
+        
+        <div class="form-group">
+          <label for="invoice-style">Layout Template</label>
+          <select id="invoice-style" class="form-control">
+            <option value="classic">Classic Professional</option>
+            <option value="modern" selected>Modern Minimalist</option>
+            <option value="creative">Creative Elegant</option>
+            <option value="stripe">Bold Stripe</option>
+          </select>
+        </div>
+
+        <div class="color-pickers-group">
+          <div class="form-group">
+            <label for="primary-color">Primary Color</label>
+            <div class="color-picker-wrapper">
+              <input type="color" id="primary-color" value="#2563eb">
+              <span class="color-hex">#2563eb</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="accent-color">Accent Color</label>
+            <div class="color-picker-wrapper">
+              <input type="color" id="accent-color" value="#3b82f6">
+              <span class="color-hex">#3b82f6</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-pickers-group">
+          <div class="form-group">
+            <label for="header-bg-color">Header Background</label>
+            <div class="color-picker-wrapper">
+              <input type="color" id="header-bg-color" value="#f8fafc">
+              <span class="color-hex">#f8fafc</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="table-header-color">Table Header Text</label>
+            <div class="color-picker-wrapper">
+              <input type="color" id="table-header-color" value="#ffffff">
+              <span class="color-hex">#ffffff</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="font-family">Typography Font</label>
+          <select id="font-family" class="form-control">
+            <optgroup label="Dhivehi / Thaana">
+              <option value="'Faruma_Regular', 'Inter', sans-serif" selected>Faruma Regular (Dhivehi + English)</option>
+              <option value="'A_Faruma', 'Faruma_Regular', 'Inter', sans-serif">A Faruma (Dhivehi)</option>
+              <option value="'A_Rivethi', 'Faruma_Regular', 'Inter', sans-serif">A Rivethi (Dhivehi)</option>
+            </optgroup>
+            <optgroup label="Latin">
+              <option value="'Inter', sans-serif">Inter (Modern & Clean)</option>
+              <option value="'Outfit', sans-serif">Outfit (Sleek Geometric)</option>
+              <option value="'Roboto', sans-serif">Roboto (Structured Technical)</option>
+              <option value="'Playfair Display', serif">Playfair Display (Elegant Serif)</option>
+              <option value="'Courier Prime', monospace">Courier Prime (Retro Technical)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="border-radius">Border Rounding</label>
+          <div class="range-slider">
+            <input type="range" id="border-radius" min="0" max="20" value="8">
+            <span id="border-radius-val">8px</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="font-size-base">Base Font Size</label>
+          <div class="range-slider">
+            <input type="range" id="font-size-base" min="11" max="16" value="13">
+            <span id="font-size-base-val">13px</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Config & Settings -->
+      <div class="sidebar-section">
+        <h3>Toggles & Configurations</h3>
+        
+        <div class="switch-group">
+          <label class="switch-container">
+            <input type="checkbox" id="toggle-shipping" checked>
+            <span class="switch-slider"></span>
+            Show Shipping Info
+          </label>
+        </div>
+
+        <div class="switch-group">
+          <label class="switch-container">
+            <input type="checkbox" id="toggle-auto-invoice-num" checked>
+            <span class="switch-slider"></span>
+            Auto-generate Invoice No.
+          </label>
+        </div>
+
+        <div class="form-group" id="invoice-prefix-group">
+          <label for="invoice-prefix">Invoice No. Prefix</label>
+          <input type="text" id="invoice-prefix" class="form-control" value="INV-2026-">
+        </div>
+      </div>
+
+      <!-- Live Validations -->
+      <div class="sidebar-section val-section">
+        <h3>Live Validation</h3>
+        <div class="validation-panel" id="validation-errors">
+          <div class="val-success-msg"><i data-lucide="check-circle-2"></i> Invoice checks out perfectly!</div>
+        </div>
+      </div>
+      
+      <!-- Footer Note inside sidebar -->
+      <div class="sidebar-footer">
+        <p>Press <kbd>Tab</kbd> to navigate table fields. Pressing <kbd>Tab</kbd> on the last cell adds a new row.</p>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="workspace" id="workspace-container">
+      
+      <!-- Print Preview Banner -->
+      <div class="preview-banner no-print" id="preview-banner">
+        <span><i data-lucide="eye"></i> You are currently viewing the **Print Preview** mode. All editing borders and panels are hidden.</span>
+        <button class="btn btn-secondary btn-sm" id="btn-exit-preview">Exit Preview</button>
+      </div>
+
+      <!-- Invoice Sheet Container -->
+      <div class="invoice-container">
+        <div class="invoice-card" id="invoice-card">
+          
+          <!-- Colored Top Accent Line (Stripe Style) -->
+          <div class="top-stripe" id="stripe-accent"></div>
+
+          <!-- 1. Header (Company Profile & Logo) -->
+          <header class="invoice-header" id="invoice-header-section">
+            <div class="header-main-info">
+              <!-- Company Logo Drag-and-Drop Area -->
+              <div class="logo-upload-zone" id="logo-drop-zone">
+                <input type="file" id="logo-file-input" accept="image/png, image/jpeg, image/svg+xml" style="display: none;">
+                <div class="logo-placeholder" id="logo-placeholder">
+                  <i data-lucide="image-plus" class="upload-icon"></i>
+                  <span>Upload Logo<br><small>Drag & Drop or Click</small></span>
+                </div>
+                <div class="logo-preview-wrapper" id="logo-preview-wrapper" style="display: none;">
+                  <img id="logo-preview" src="" alt="Company Logo">
+                  <button class="remove-img-btn no-print" id="btn-remove-logo" title="Remove Logo">
+                    <i data-lucide="x"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Company Fields Grid -->
+              <div class="company-details">
+                <input type="text" id="company-name" class="editable-input company-name-field" placeholder="Your Company Name" value="Apex Global Solutions Ltd">
+                <div class="company-subfields">
+                  <input type="text" id="company-reg" class="editable-input" placeholder="Business Reg. No." value="Reg No: 12345678-A">
+                  <input type="text" id="company-tax-id" class="editable-input" placeholder="Tax Registration No." value="Tax ID: GB987654321">
+                </div>
+              </div>
+            </div>
+
+            <!-- Company Contact Info -->
+            <div class="company-contact">
+              <div class="contact-row">
+                <i data-lucide="map-pin" class="contact-icon no-print"></i>
+                <textarea id="company-address" class="editable-textarea address-field" placeholder="Company Address, City, Country" rows="3">100 Pine Street, Suite 2400&#10;San Francisco, CA 94111&#10;United States</textarea>
+              </div>
+              <div class="contact-row">
+                <i data-lucide="phone" class="contact-icon no-print"></i>
+                <input type="text" id="company-phone" class="editable-input" placeholder="Phone" value="+1 (415) 555-0199">
+              </div>
+              <div class="contact-row">
+                <i data-lucide="mail" class="contact-icon no-print"></i>
+                <input type="text" id="company-email" class="editable-input" placeholder="Email" value="billing@apexglobal.com">
+              </div>
+              <div class="contact-row">
+                <i data-lucide="globe" class="contact-icon no-print"></i>
+                <input type="text" id="company-website" class="editable-input" placeholder="Website" value="www.apexglobal.com">
+              </div>
+            </div>
+          </header>
+
+          <hr class="header-divider">
+
+          <!-- 2. Invoice Details & Client Information -->
+          <div class="invoice-meta-section">
+            
+            <!-- Left Side: Client (Bill To / Ship To) -->
+            <div class="client-info-block">
+              <!-- Bill To -->
+              <div class="bill-to-pane">
+                <h4 class="meta-section-title">Bill To</h4>
+                <input type="text" id="client-name" class="editable-input client-name-field" placeholder="Customer Name *" value="Jane Doe">
+                <input type="text" id="client-company" class="editable-input" placeholder="Client Company" value="Acme Corporation">
+                <textarea id="client-address" class="editable-textarea address-field" placeholder="Client Address, City, Country" rows="3">456 Oak Avenue, Building 4B&#10;Boston, MA 02110&#10;United States</textarea>
+                <div class="contact-row inline-row">
+                  <i data-lucide="phone" class="contact-icon no-print"></i>
+                  <input type="text" id="client-phone" class="editable-input" placeholder="Client Phone" value="+1 (617) 555-0245">
+                </div>
+                <div class="contact-row inline-row">
+                  <i data-lucide="mail" class="contact-icon no-print"></i>
+                  <input type="text" id="client-email" class="editable-input" placeholder="Client Email" value="jane.doe@acme.com">
+                </div>
+                <div class="contact-row inline-row">
+                  <i data-lucide="hash" class="contact-icon no-print"></i>
+                  <input type="text" id="client-tax-id" class="editable-input" placeholder="Client Tax / VAT ID" value="VAT ID: US554433221">
+                </div>
+              </div>
+
+              <!-- Ship To (Conditional) -->
+              <div class="ship-to-pane" id="shipping-section">
+                <h4 class="meta-section-title">Ship To</h4>
+                <input type="text" id="ship-name" class="editable-input" placeholder="Recipient Name" value="Jane Doe (HQ)">
+                <textarea id="ship-address" class="editable-textarea address-field" placeholder="Shipping Address, City, Country" rows="4">456 Oak Avenue, Building 4B&#10;Boston, MA 02110&#10;United States</textarea>
+              </div>
+            </div>
+
+            <!-- Right Side: Invoice Meta Details -->
+            <div class="invoice-details-block">
+              <div class="invoice-title-wrapper">
+                <input type="text" id="invoice-title-label" class="editable-input invoice-title" value="INVOICE">
+              </div>
+
+              <div class="meta-grid">
+                <div class="meta-label">Invoice No:</div>
+                <div class="meta-val">
+                  <input type="text" id="invoice-number" class="editable-input" placeholder="INV-2026-0001 *" value="INV-2026-0001">
+                </div>
+
+                <div class="meta-label">Invoice Date:</div>
+                <div class="meta-val">
+                  <input type="date" id="invoice-date" class="editable-input">
+                </div>
+
+                <div class="meta-label">Due Date:</div>
+                <div class="meta-val">
+                  <input type="date" id="invoice-due-date" class="editable-input">
+                </div>
+
+                <div class="meta-label">Payment Terms:</div>
+                <div class="meta-val">
+                  <select id="payment-terms" class="editable-select">
+                    <option value="Due on Receipt">Due on Receipt</option>
+                    <option value="Net 15">Net 15</option>
+                    <option value="Net 30" selected>Net 30</option>
+                    <option value="Net 45">Net 45</option>
+                    <option value="Net 60">Net 60</option>
+                    <option value="Custom">Custom</option>
+                  </select>
+                </div>
+
+                <div class="meta-label">PO Number:</div>
+                <div class="meta-val">
+                  <input type="text" id="po-number" class="editable-input" placeholder="P.O. Number" value="PO-998877">
+                </div>
+
+                <div class="meta-label">Reference No:</div>
+                <div class="meta-val">
+                  <input type="text" id="ref-number" class="editable-input" placeholder="Reference ID" value="REF-654">
+                </div>
+
+                <div class="meta-label">Currency:</div>
+                <div class="meta-val currency-select-wrapper">
+                  <select id="invoice-currency" class="editable-select">
+                    <option value="USD" data-symbol="$" selected>USD ($)</option>
+                    <option value="EUR" data-symbol="€">EUR (€)</option>
+                    <option value="GBP" data-symbol="£">GBP (£)</option>
+                    <option value="AUD" data-symbol="A$">AUD (A$)</option>
+                    <option value="CAD" data-symbol="C$">CAD (C$)</option>
+                    <option value="AED" data-symbol="د.إ">AED (د.إ)</option>
+                    <option value="MVR" data-symbol="Rf">MVR (Rf)</option>
+                    <option value="INR" data-symbol="₹">INR (₹)</option>
+                    <option value="LKR" data-symbol="Rs">LKR (Rs)</option>
+                    <option value="SGD" data-symbol="S$">SGD (S$)</option>
+                    <option value="MYR" data-symbol="RM">MYR (RM)</option>
+                    <option value="SAR" data-symbol="SR">SAR (SR)</option>
+                    <option value="QAR" data-symbol="QR">QAR (QR)</option>
+                    <option value="CUSTOM" data-symbol="CUSTOM">Custom...</option>
+                  </select>
+                  <input type="text" id="custom-currency-symbol" class="editable-input custom-symbol-input" placeholder="Symbol (e.g. ¥)" style="display: none;">
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 3. Invoice Items Table -->
+          <div class="items-table-wrapper">
+            <table class="items-table" id="items-table">
+              <thead>
+                <tr>
+                  <th class="col-num text-center">No.</th>
+                  <th class="col-desc">Description / Service details</th>
+                  <th class="col-qty text-right">Qty</th>
+                  <th class="col-unit text-center">Unit</th>
+                  <th class="col-price text-right">Price</th>
+                  <th class="col-disc text-right">Disc %</th>
+                  <th class="col-tax text-right">Tax %</th>
+                  <th class="col-amount text-right">Amount</th>
+                  <th class="col-actions text-center no-print"></th>
+                </tr>
+              </thead>
+              <tbody id="items-tbody">
+                <!-- Rows will be dynamically loaded via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Add Item Row Trigger (No Print) -->
+          <div class="add-row-container no-print">
+            <button class="btn btn-outline btn-sm" id="btn-add-item">
+              <i data-lucide="plus-circle"></i> Add Item Row
+            </button>
+          </div>
+
+          <!-- 4. Totals and Notes / Payments -->
+          <div class="summary-section">
+            
+            <!-- Left Side: Bank Details & Instructions -->
+            <div class="bank-details-pane">
+              <h4 class="meta-section-title">Payment Details</h4>
+              <div class="bank-details-grid">
+                <label>Bank Name:</label>
+                <input type="text" id="bank-name" class="editable-input" placeholder="Bank Name" value="Silicon Valley Bank">
+
+                <label>Account Name:</label>
+                <input type="text" id="bank-acc-name" class="editable-input" placeholder="Account Name" value="Apex Global Solutions Ltd">
+
+                <label>Account Number:</label>
+                <input type="text" id="bank-acc-num" class="editable-input" placeholder="Account Number" value="1122334455">
+
+                <label>IBAN:</label>
+                <input type="text" id="bank-iban" class="editable-input" placeholder="IBAN" value="US89 SVBA 0112 2334 4556 78">
+
+                <label>SWIFT/BIC:</label>
+                <input type="text" id="bank-swift" class="editable-input" placeholder="SWIFT/BIC" value="SVBANY33">
+              </div>
+
+              <div class="instructions-block">
+                <label for="payment-instructions">Payment Instructions:</label>
+                <textarea id="payment-instructions" class="editable-textarea" rows="2" placeholder="Transfer instructions...">Please mention the invoice number as reference when making the bank wire transfer.</textarea>
+              </div>
+            </div>
+
+            <!-- Right Side: Calculations -->
+            <div class="totals-pane" id="totals-calculator">
+              <div class="totals-grid">
+                
+                <div class="total-label">Subtotal:</div>
+                <div class="total-value text-right" id="calc-subtotal">$0.00</div>
+
+                <div class="total-label">Discount Total:</div>
+                <div class="total-value text-right text-discount" id="calc-discount-total">-$0.00</div>
+
+                <div class="total-label">Tax Total:</div>
+                <div class="total-value text-right" id="calc-tax-total">$0.00</div>
+
+                <div class="total-label-input">
+                  <span>Shipping:</span>
+                </div>
+                <div class="total-value-input">
+                  <span class="curr-sym">$</span>
+                  <input type="number" id="charge-shipping" class="editable-input text-right summary-input" min="0" step="any" value="50.00">
+                </div>
+
+                <div class="total-label-input">
+                  <span>Additional Charges:</span>
+                </div>
+                <div class="total-value-input">
+                  <span class="curr-sym">$</span>
+                  <input type="number" id="charge-additional" class="editable-input text-right summary-input" min="0" step="any" value="0.00">
+                </div>
+
+                <hr class="grid-divider">
+                <hr class="grid-divider">
+
+                <div class="total-label grand-label">Grand Total:</div>
+                <div class="total-value grand-value text-right" id="calc-grand-total">$0.00</div>
+
+                <div class="total-label-input paid-label">
+                  <span>Amount Paid:</span>
+                </div>
+                <div class="total-value-input paid-value">
+                  <span class="curr-sym">$</span>
+                  <input type="number" id="charge-paid" class="editable-input text-right summary-input bold-input" min="0" step="any" value="0.00">
+                </div>
+
+                <div class="total-label due-label">Balance Due:</div>
+                <div class="total-value due-value text-right" id="calc-balance-due">$0.00</div>
+
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 5. Notes & Terms -->
+          <div class="notes-terms-section">
+            <div class="notes-box">
+              <label for="invoice-notes">Client Notes</label>
+              <textarea id="invoice-notes" class="editable-textarea" rows="3" placeholder="Enter notes to customer...">Thank you for choosing Apex Global Solutions! We appreciate your business. Please reach out if you have any questions about this invoice.</textarea>
+            </div>
+            
+            <div class="terms-box">
+              <label for="invoice-terms">Terms & Conditions</label>
+              <textarea id="invoice-terms" class="editable-textarea" rows="3" placeholder="Enter terms and conditions...">All invoices are subject to standard payment within 30 days. Late payments may accrue interest at 1.5% per month. Goods remain the property of Apex Global Solutions Ltd until fully paid.</textarea>
+            </div>
+          </div>
+
+          <!-- 6. Signatures and Footer -->
+          <footer class="invoice-footer">
+            <div class="footer-layout">
+              <!-- Left Side: Notes/Footer Text -->
+              <div class="footer-message-block">
+                <input type="text" id="footer-text" class="editable-input footer-signature-message" placeholder="Custom Footer Note" value="Apex Global Solutions Ltd • www.apexglobal.com • billing@apexglobal.com">
+              </div>
+
+              <!-- Right Side: Authorized Signature -->
+              <div class="signature-block">
+                <div class="signature-upload-zone" id="signature-drop-zone">
+                  <input type="file" id="signature-file-input" accept="image/png, image/jpeg, image/svg+xml" style="display: none;">
+                  <div class="sig-placeholder" id="sig-placeholder">
+                    <i data-lucide="signature" class="upload-icon"></i>
+                    <span>Authorized Signature</span>
+                  </div>
+                  <div class="sig-preview-wrapper" id="sig-preview-wrapper" style="display: none;">
+                    <img id="sig-preview" src="" alt="Authorized Signature">
+                    <button class="remove-img-btn no-print" id="btn-remove-sig" title="Remove Signature">
+                      <i data-lucide="x"></i>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="signature-meta">
+                  <input type="text" id="sig-name" class="editable-input text-center sig-name" placeholder="Authorized Representative" value="Marcus Aurelius">
+                  <input type="text" id="sig-position" class="editable-input text-center sig-title" placeholder="Position / Title" value="Chief Financial Officer">
+                  <input type="date" id="sig-date" class="editable-input text-center sig-date">
+                </div>
+              </div>
+            </div>
+          </footer>
+
+        </div>
+      </div>
+      
+    </main>
+
+  </div>
+
+  <!-- Script logic -->
+  <script src="app.js"></script>
+</body>
+</html>

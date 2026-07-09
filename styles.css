@@ -1,0 +1,1793 @@
+/* styles.css - Production Invoicing Stylesheet */
+
+/* ----------------------------------------------------
+   0. Local Dhivehi/Thaana Fonts
+   A_Faruma and A_Rivethi contain Thaana glyphs only (no Latin letters).
+   Faruma_Regular contains both Thaana and Latin letters.
+   Font stacks below fall back to Faruma_Regular for any Latin characters
+   when A_Faruma/A_Rivethi are selected, so English text still displays.
+   ---------------------------------------------------- */
+@font-face {
+  font-family: 'A_Faruma';
+  src: url('fonts/A_Faruma.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'A_Rivethi';
+  src: url('fonts/A_Rivethi.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Faruma_Regular';
+  src: url('fonts/Faruma_Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ----------------------------------------------------
+   1. Theme Variables & Base Style Reset
+   ---------------------------------------------------- */
+:root {
+  /* Default Theme: Light Mode & Customizer Defaults */
+  --primary-color: #2563eb;
+  --accent-color: #3b82f6;
+  --header-bg: #f8fafc;
+  --table-header-txt: #ffffff;
+  --border-radius: 8px;
+  --font-family: 'Faruma_Regular', 'Inter', sans-serif;
+  --font-size-base: 13px;
+
+  /* Theme-specific Colors (System Light) */
+  --bg-app: #f1f5f9;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --border-color: #e2e8f0;
+  --input-bg-focus: #f8fafc;
+  --input-border-focus: #2563eb;
+  --btn-secondary-bg: #f1f5f9;
+  --btn-secondary-hover: #e2e8f0;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+
+  /* Invoice Grid Spacing */
+  --invoice-padding: 40px;
+}
+
+[data-theme="dark"] {
+  /* Theme-specific Colors (System Dark) */
+  --bg-app: #090d16;
+  --bg-sidebar: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-light: #64748b;
+  --border-color: #334155;
+  --input-bg-focus: #0f172a;
+  --input-border-focus: #3b82f6;
+  --btn-secondary-bg: #334155;
+  --btn-secondary-hover: #475569;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Scrollbars styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-light);
+}
+
+/* Keyboard Outline */
+*:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------
+   2. Layout & Containers
+   ---------------------------------------------------- */
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+}
+
+/* Sidebar Controls */
+.sidebar {
+  width: 340px;
+  flex-shrink: 0;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  transition: background-color 0.25s ease, border-color 0.25s ease;
+  z-index: 10;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 16px;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-icon {
+  color: var(--primary-color);
+  width: 28px;
+  height: 28px;
+}
+
+.app-brand h1 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.app-brand p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--btn-secondary-bg);
+  border-color: var(--text-light);
+}
+
+/* Hide theme icons appropriately */
+[data-theme="light"] .theme-icon-light,
+[data-theme="dark"] .theme-icon-dark {
+  display: none;
+}
+
+.theme-toggle-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.sidebar-section h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+/* Workspace Canvas */
+.workspace {
+  flex-grow: 1;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  height: 100vh;
+  gap: 20px;
+}
+
+/* ----------------------------------------------------
+   3. Input Fields & Common UI Elements
+   ---------------------------------------------------- */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+
+.form-control {
+  width: 100%;
+  background-color: var(--bg-app);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px 12px;
+  border-radius: var(--border-radius);
+  font-size: 0.85rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  background-color: var(--bg-sidebar);
+}
+
+.color-pickers-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.color-picker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--bg-app);
+  overflow: hidden;
+  padding: 4px;
+  height: 38px;
+}
+
+.color-picker-wrapper input[type="color"] {
+  border: none;
+  background: none;
+  width: 36px;
+  height: 28px;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 4px;
+}
+
+.color-picker-wrapper input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.color-picker-wrapper input[type="color"]::-webkit-color-swatch {
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.color-hex {
+  font-size: 0.75rem;
+  font-family: monospace;
+  font-weight: 600;
+  padding-left: 8px;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.range-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.range-slider input[type="range"] {
+  flex-grow: 1;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.range-slider span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Switch styling */
+.switch-group {
+  display: flex;
+  align-items: center;
+}
+
+.switch-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  user-select: none;
+}
+
+.switch-container input {
+  display: none;
+}
+
+.switch-slider {
+  position: relative;
+  width: 36px;
+  height: 20px;
+  background-color: var(--border-color);
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.switch-slider::before {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  top: 3px;
+  left: 3px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.switch-container input:checked + .switch-slider {
+  background-color: var(--primary-color);
+}
+
+.switch-container input:checked + .switch-slider::before {
+  transform: translateX(16px);
+}
+
+/* Keyboard shortcut indicator */
+.sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.sidebar-footer kbd {
+  background-color: var(--btn-secondary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+/* Action Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--border-radius);
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  border: 1px solid transparent;
+  width: 100%;
+}
+
+.btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+.btn-primary:hover {
+  background-color: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: var(--btn-secondary-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+.btn-secondary:hover {
+  background-color: var(--btn-secondary-hover);
+  border-color: var(--text-light);
+}
+
+.btn-outline {
+  background-color: transparent;
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+.btn-outline:hover {
+  background-color: var(--btn-secondary-bg);
+  border-color: var(--text-light);
+}
+
+.btn-danger-outline {
+  background-color: transparent;
+  border-color: #f87171;
+  color: #ef4444;
+}
+.btn-danger-outline:hover {
+  background-color: #fef2f2;
+  border-color: #dc2626;
+}
+[data-theme="dark"] .btn-danger-outline:hover {
+  background-color: #451a1a;
+  border-color: #f87171;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  width: auto;
+}
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.file-upload-label {
+  width: 100%;
+}
+
+/* ----------------------------------------------------
+   4. Validation Errors Panel
+   ---------------------------------------------------- */
+.validation-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.val-error-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+[data-theme="dark"] .val-error-item {
+  background-color: #2d1e1e;
+  border-color: #7f1d1d;
+  color: #fca5a5;
+}
+
+.val-error-item svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.val-success-msg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #15803d;
+  font-weight: 600;
+  font-size: 0.8rem;
+  padding: 8px 0;
+}
+[data-theme="dark"] .val-success-msg {
+  color: #4ade80;
+}
+
+.val-success-msg svg {
+  width: 16px;
+  height: 16px;
+  color: inherit;
+}
+
+/* ----------------------------------------------------
+   5. Invoice Paper / Canvas Layout (Light theme look ALWAYS on paper)
+   ---------------------------------------------------- */
+.invoice-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 900px;
+}
+
+/* The A4 Canvas Card */
+.invoice-card {
+  width: 210mm;
+  min-height: 297mm;
+  background-color: #ffffff;
+  color: #1e293b; /* Enforce high-contrast dark text always inside sheet */
+  padding: var(--invoice-padding);
+  box-shadow: var(--shadow-card);
+  border-radius: var(--border-radius);
+  border: 1px solid #cbd5e1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: border-radius 0.25s ease;
+}
+
+/* Dark mode tweaks for editing wrapper but keeping invoice sheet mostly white */
+[data-theme="dark"] .invoice-card {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  border-color: #475569;
+}
+
+/* Stripe Accent line */
+.top-stripe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background-color: var(--primary-color);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
+  display: none; /* Triggered by layout template */
+}
+
+/* Header style dividers */
+.header-divider {
+  border: 0;
+  height: 1px;
+  background-color: #cbd5e1;
+  margin: 24px 0;
+}
+
+/* Inline Editable Inputs styling */
+.editable-input,
+.editable-textarea,
+.editable-select {
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  width: 100%;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  resize: none;
+}
+
+.editable-input:hover,
+.editable-textarea:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.editable-input:focus,
+.editable-textarea:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.editable-select {
+  cursor: pointer;
+  appearance: none;
+  padding-right: 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' path d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  background-size: 12px;
+}
+
+.editable-select:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+}
+.editable-select:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: var(--primary-color);
+}
+
+/* Remove default number input spin buttons inside sheet */
+.editable-input[type="number"]::-webkit-outer-spin-button,
+.editable-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.editable-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* ----------------------------------------------------
+   6. Detailed Invoice Sections inside sheet
+   ---------------------------------------------------- */
+
+/* Logo upload controls */
+.logo-upload-zone {
+  width: 180px;
+  height: 80px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  user-select: none;
+  background-color: #f8fafc;
+}
+
+.logo-upload-zone:hover {
+  border-color: var(--primary-color);
+  background-color: #f1f5f9;
+}
+
+.logo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #64748b;
+}
+
+.logo-placeholder svg {
+  width: 22px;
+  height: 22px;
+}
+
+.logo-placeholder span {
+  font-size: 0.7rem;
+  line-height: 1.3;
+}
+
+.logo-preview-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-preview-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.remove-img-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background-color: rgba(239, 68, 68, 0.9);
+  color: #ffffff;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.logo-upload-zone:hover .remove-img-btn {
+  opacity: 1;
+}
+
+.remove-img-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Company Header Layout */
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.header-main-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex-grow: 1;
+}
+
+.company-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 380px;
+}
+
+.company-name-field {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  padding: 4px 6px;
+  line-height: 1.2;
+}
+
+.company-subfields {
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.company-contact {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.8rem;
+  text-align: right;
+  align-items: flex-end;
+}
+
+.contact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.contact-row svg {
+  width: 12px;
+  height: 12px;
+  color: #94a3b8;
+  margin-top: 6px;
+}
+
+.address-field {
+  text-align: inherit;
+  line-height: 1.4;
+  height: auto;
+}
+
+/* Billing Details Block */
+.invoice-meta-section {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 40px;
+  margin-bottom: 24px;
+}
+
+.client-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.meta-section-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary-color);
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 4px;
+}
+
+.client-name-field {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.inline-row {
+  font-size: 0.8rem;
+  justify-content: flex-start;
+}
+.inline-row svg {
+  margin-top: 6px;
+  margin-left: 2px;
+}
+
+.bill-to-pane .address-field {
+  text-align: left;
+}
+
+.ship-to-pane {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ship-to-pane .address-field {
+  text-align: left;
+}
+
+/* Invoice Meta Info (Right pane) */
+.invoice-details-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.invoice-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--primary-color);
+  text-align: right;
+  padding: 0 6px;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: auto 160px;
+  column-gap: 12px;
+  row-gap: 6px;
+  font-size: 0.85rem;
+  text-align: right;
+  align-items: center;
+}
+
+.meta-label {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.meta-val input {
+  text-align: right;
+}
+
+.meta-val select {
+  text-align: right;
+}
+
+.currency-select-wrapper {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.custom-symbol-input {
+  width: 50px !important;
+  font-family: monospace;
+  text-align: center;
+  border-color: #cbd5e1 !important;
+  background-color: #f8fafc !important;
+}
+
+/* ----------------------------------------------------
+   7. Items Table Elements
+   ---------------------------------------------------- */
+.items-table-wrapper {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.items-table th {
+  background-color: var(--primary-color);
+  color: var(--table-header-txt);
+  padding: 10px 12px;
+  font-weight: 700;
+  border: 1px solid var(--primary-color);
+}
+
+.items-table th:first-child {
+  border-top-left-radius: var(--border-radius);
+}
+.items-table th:last-child {
+  border-top-right-radius: var(--border-radius);
+}
+
+.items-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.col-num { width: 5%; }
+.col-desc { width: 40%; }
+.col-qty { width: 9%; }
+.col-unit { width: 9%; }
+.col-price { width: 12%; }
+.col-disc { width: 9%; }
+.col-tax { width: 9%; }
+.col-amount { width: 12%; }
+.col-actions { width: 5%; }
+
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+
+.item-row {
+  transition: background-color 0.15s ease;
+}
+
+.item-row:hover {
+  background-color: #f8fafc;
+}
+
+.item-desc-area {
+  min-height: 38px;
+  overflow-y: hidden;
+}
+
+.item-actions-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.row-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.row-action-btn:hover {
+  color: #3b82f6;
+  background-color: #f1f5f9;
+}
+
+.row-action-btn.btn-delete-row:hover {
+  color: #ef4444;
+  background-color: #fee2e2;
+}
+
+.row-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.add-row-container {
+  margin-top: 12px;
+}
+
+/* ----------------------------------------------------
+   8. Summary and Calculations Block
+   ---------------------------------------------------- */
+.summary-section {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 40px;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.bank-details-grid {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  row-gap: 6px;
+  column-gap: 12px;
+  font-size: 0.8rem;
+  align-items: center;
+}
+
+.bank-details-grid label {
+  font-weight: 600;
+  color: #64748b;
+  text-align: left;
+}
+
+.instructions-block {
+  margin-top: 16px;
+  font-size: 0.8rem;
+}
+
+.instructions-block label {
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Calculations pane */
+.totals-pane {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.totals-grid {
+  display: grid;
+  grid-template-columns: 1fr 120px;
+  row-gap: 8px;
+  column-gap: 12px;
+  font-size: 0.85rem;
+  text-align: right;
+  align-items: center;
+}
+
+.total-label {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.total-value {
+  font-weight: 500;
+  padding-right: 6px;
+}
+
+.total-label-input {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.total-value-input {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 0 4px;
+  transition: border-color 0.15s ease;
+}
+
+.total-value-input:hover {
+  border-color: #94a3b8;
+}
+
+.total-value-input:focus-within {
+  border-color: var(--primary-color);
+}
+
+.curr-sym {
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 0.8rem;
+  padding-right: 2px;
+}
+
+.summary-input {
+  text-align: right;
+  padding: 2px 0 2px 2px;
+  border: none !important;
+  background: transparent !important;
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: none !important;
+}
+
+.bold-input {
+  font-weight: 700;
+}
+
+.text-discount {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.grid-divider {
+  grid-column: span 2;
+  border: 0;
+  height: 1px;
+  background-color: #e2e8f0;
+  margin: 4px 0;
+}
+
+.grand-label {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+.grand-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary-color);
+}
+
+.paid-label {
+  font-weight: 700;
+  color: #0f172a;
+}
+.paid-value {
+  font-weight: 700;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.due-label {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #0f172a;
+  border-top: 1px double #94a3b8;
+  padding-top: 8px;
+}
+.due-value {
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #ef4444; /* High warning for balance due */
+  border-top: 1px double #94a3b8;
+  padding-top: 8px;
+}
+
+/* ----------------------------------------------------
+   9. Terms, Notes, Footers
+   ---------------------------------------------------- */
+.notes-terms-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #cbd5e1;
+}
+
+.notes-box, .terms-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.notes-box label,
+.terms-box label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.05em;
+}
+
+.notes-box textarea,
+.terms-box textarea {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #475569;
+}
+
+/* Footer layout */
+.invoice-footer {
+  margin-top: 30px;
+  padding-top: 16px;
+  border-top: 1px solid #cbd5e1;
+}
+
+.footer-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 30px;
+}
+
+.footer-message-block {
+  flex-grow: 1;
+}
+
+.footer-signature-message {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: left;
+}
+
+/* Authorized Signature area */
+.signature-block {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.signature-upload-zone {
+  width: 100%;
+  height: 60px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: #f8fafc;
+  user-select: none;
+}
+
+.signature-upload-zone:hover {
+  border-color: var(--primary-color);
+  background-color: #f1f5f9;
+}
+
+.sig-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: #94a3b8;
+}
+.sig-placeholder svg {
+  width: 18px;
+  height: 18px;
+}
+.sig-placeholder span {
+  font-size: 0.65rem;
+}
+
+.sig-preview-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sig-preview-wrapper img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+.signature-meta {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sig-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.sig-title {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.sig-date {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+  border-top: 1px solid #e2e8f0 !important;
+  margin-top: 4px;
+  border-radius: 0;
+}
+
+/* ----------------------------------------------------
+   10. Layout Customizer styles
+   ---------------------------------------------------- */
+
+/* Classic layout */
+.layout-classic .invoice-card {
+  border: 3px double #94a3b8;
+}
+.layout-classic .invoice-header {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.layout-classic .header-main-info {
+  align-items: center;
+}
+.layout-classic .company-contact {
+  text-align: center;
+  align-items: center;
+  width: 100%;
+}
+.layout-classic .company-contact .contact-row {
+  justify-content: center;
+}
+.layout-classic .invoice-meta-section {
+  grid-template-columns: 1fr 1fr;
+}
+.layout-classic .invoice-details-block {
+  align-items: flex-end;
+}
+.layout-classic .items-table th {
+  background-color: transparent !important;
+  color: #000000 !important;
+  border-bottom: 2px solid #000000;
+  border-top: 2px solid #000000;
+  border-left: none;
+  border-right: none;
+  border-radius: 0 !important;
+}
+.layout-classic .items-table td {
+  border-bottom: 1px solid #cbd5e1;
+}
+
+/* Modern Layout (Default is modern) */
+.layout-modern .invoice-card {
+  border: 1px solid #cbd5e1;
+}
+
+/* Creative Layout */
+.layout-creative .invoice-card {
+  border-left: 20px solid var(--primary-color);
+  border-radius: 0;
+}
+.layout-creative .invoice-header {
+  background-color: var(--header-bg);
+  margin: calc(var(--invoice-padding) * -1) calc(var(--invoice-padding) * -1) 24px calc(var(--invoice-padding) * -1);
+  padding: 30px var(--invoice-padding);
+  border-bottom: 1px solid #cbd5e1;
+}
+.layout-creative .header-divider {
+  display: none;
+}
+
+/* Bold Stripe Layout */
+.layout-stripe .invoice-card {
+  border: 1px solid #cbd5e1;
+}
+.layout-stripe .top-stripe {
+  display: block;
+}
+.layout-stripe .invoice-header {
+  padding-top: 10px;
+}
+.layout-stripe .items-table th {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border: 1px solid #0f172a;
+}
+.layout-stripe .grand-value {
+  color: #0f172a;
+}
+
+/* ----------------------------------------------------
+   11. Preview Banner and Preview Mode
+   ---------------------------------------------------- */
+.preview-banner {
+  background-color: #1e3a8a;
+  color: #ffffff;
+  width: 100%;
+  max-width: 900px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  font-size: 0.85rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 10px;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.preview-banner.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.preview-banner span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.preview-banner span svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Active Preview Mode overrides inside application workspace */
+.preview-mode-active .sidebar {
+  display: none; /* Hide sidebar completely in editor preview */
+}
+
+.preview-mode-active .app-layout {
+  justify-content: center;
+}
+
+.preview-mode-active .workspace {
+  padding: 20px;
+  align-items: center;
+}
+
+/* Hide all editable helpers in preview mode */
+.preview-mode-active .logo-placeholder {
+  display: none !important;
+}
+.preview-mode-active .logo-upload-zone:not(.has-image) {
+  display: none !important;
+}
+.preview-mode-active .logo-upload-zone {
+  border: none !important;
+  background: transparent !important;
+}
+
+.preview-mode-active .sig-placeholder {
+  display: none !important;
+}
+.preview-mode-active .signature-upload-zone:not(.has-image) {
+  display: none !important;
+}
+.preview-mode-active .signature-upload-zone {
+  border: none !important;
+  background: transparent !important;
+}
+
+.preview-mode-active .editable-input,
+.preview-mode-active .editable-textarea,
+.preview-mode-active .editable-select {
+  pointer-events: none;
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  padding: 4px 0px;
+}
+
+.preview-mode-active .editable-select {
+  background-image: none !important;
+}
+
+.preview-mode-active .contact-icon {
+  display: none !important;
+}
+
+.preview-mode-active .company-contact,
+.preview-mode-active .company-contact textarea {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.preview-mode-active .bill-to-pane textarea {
+  text-align: left;
+}
+
+.preview-mode-active .ship-to-pane textarea {
+  text-align: left;
+}
+
+/* ----------------------------------------------------
+   12. Print Media Styles (A4 Page Fit)
+   ---------------------------------------------------- */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .app-layout {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .workspace {
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .invoice-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .invoice-card {
+    width: 100% !important;
+    min-height: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  /* Force light colors during printing */
+  .editable-input,
+  .editable-textarea,
+  .editable-select {
+    pointer-events: none !important;
+    border-color: transparent !important;
+    background-color: transparent !important;
+    padding: 2px 0px !important;
+    color: #000000 !important;
+  }
+  
+  .editable-select {
+    background-image: none !important;
+  }
+
+  /* Custom styling configurations printed cleanly */
+  .items-table th {
+    background-color: var(--primary-color) !important;
+    color: var(--table-header-txt) !important;
+    border-color: var(--primary-color) !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Keep Stripe colored */
+  .top-stripe {
+    background-color: var(--primary-color) !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .layout-creative .invoice-card {
+    border-left: 15px solid var(--primary-color) !important;
+  }
+
+  .layout-creative .invoice-header {
+    background-color: var(--header-bg) !important;
+    margin: 0 -20px 24px -20px !important;
+    padding: 20px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .layout-classic .invoice-card {
+    border: 3px double #000000 !important;
+  }
+
+  .layout-classic .items-table th {
+    background-color: transparent !important;
+    color: #000000 !important;
+    border-bottom: 2px solid #000000 !important;
+    border-top: 2px solid #000000 !important;
+  }
+
+  /* Hide image upload helpers when printing */
+  .logo-upload-zone:not(.has-image),
+  .signature-upload-zone:not(.has-image) {
+    display: none !important;
+  }
+  .logo-upload-zone,
+  .signature-upload-zone {
+    border: none !important;
+    background: transparent !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  .logo-preview-wrapper img {
+    max-height: 70px !important;
+  }
+  .sig-preview-wrapper img {
+    max-height: 50px !important;
+  }
+
+  /* Print Layout Page Margins & Setup */
+  @page {
+    size: A4 portrait;
+    margin: 12mm 12mm 12mm 12mm;
+  }
+
+  /* Preventing orphans / widows */
+  .summary-section,
+  .notes-terms-section,
+  .invoice-footer {
+    page-break-inside: avoid;
+  }
+
+  .items-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+}
+
+/* ----------------------------------------------------
+   13. Responsive Styles (Tablet and Mobile adaptation)
+   ---------------------------------------------------- */
+@media (max-width: 1024px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    max-height: 500px;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .workspace {
+    height: auto;
+    overflow-y: visible;
+    padding: 20px 10px;
+  }
+
+  .invoice-container {
+    overflow-x: auto;
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0 10px;
+  }
+
+  .invoice-card {
+    min-width: 800px; /* Force paper shape, scroll horizontally on tablet */
+  }
+}
+
+/* ----------------------------------------------------
+   14. Phone Styles (fit invoice to small screens for editing)
+   ---------------------------------------------------- */
+@media (max-width: 640px) {
+  .workspace {
+    padding: 12px 0;
+  }
+
+  .invoice-container {
+    padding: 0 8px;
+  }
+
+  .invoice-card {
+    width: 100%;
+    min-width: 0;        /* override the tablet 800px lock */
+    min-height: auto;
+    padding: 20px 16px;  /* shrink from the 40px desktop --invoice-padding */
+  }
+
+  /* Header: stack company info above invoice title/meta instead of side-by-side */
+  .invoice-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .company-details {
+    max-width: 100%;
+  }
+
+  .company-contact {
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .contact-row {
+    justify-content: flex-start;
+  }
+
+  .invoice-details-block {
+    align-items: flex-start;
+  }
+
+  .invoice-title {
+    text-align: left;
+    padding: 0 6px;
+    font-size: 1.7rem;
+  }
+
+  .meta-grid {
+    grid-template-columns: auto 1fr;
+    text-align: left;
+    width: 100%;
+  }
+
+  .meta-val input,
+  .meta-val select,
+  .currency-select-wrapper {
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  /* Bill-to / Ship-to: stack instead of two columns */
+  .invoice-meta-section {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  /* Items table: only this element scrolls horizontally, not the whole invoice */
+  .items-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--border-radius);
+  }
+
+  .items-table {
+    min-width: 620px;
+  }
+
+  /* Totals/bank details: stack instead of two columns */
+  .summary-section {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .totals-grid {
+    grid-template-columns: 1fr 110px;
+  }
+
+  /* Footer: stack signature under the footer note */
+  .footer-layout {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .signature-block {
+    width: 100%;
+  }
+}
