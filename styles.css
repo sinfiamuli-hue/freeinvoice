@@ -481,6 +481,43 @@ body {
   border-color: #f87171;
 }
 
+.btn-share {
+  background-color: #25d366;
+  color: #ffffff;
+}
+.btn-share:hover {
+  background-color: #1ebe57;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+  transform: translateY(-1px);
+}
+.btn-share:active {
+  transform: translateY(0);
+}
+.btn[disabled] {
+  opacity: 0.65;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn .spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: btn-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes btn-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Used momentarily while html2canvas captures the invoice for the
+   Share PDF button, so upload placeholders / add-item controls don't
+   end up baked into the shared PDF. */
+body.capturing-pdf .no-print {
+  display: none !important;
+}
+
 .btn-sm {
   padding: 6px 12px;
   font-size: 0.75rem;
@@ -1686,7 +1723,19 @@ body {
   }
 
   .invoice-card {
-    min-width: 800px; /* Force paper shape, scroll horizontally on tablet */
+    width: 100%;
+    min-width: 0;   /* fit to screen width as a single page, no whole-card horizontal scroll */
+    min-height: auto;
+  }
+
+  /* Only the items table scrolls horizontally if it's too wide, not the whole invoice */
+  .items-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .items-table {
+    min-width: 620px;
   }
 }
 
