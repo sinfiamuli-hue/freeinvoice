@@ -137,8 +137,11 @@
     color:var(--muted);
     line-height:1.6;
   }
-  .addr-text .dv, .addr-text .en{ display:block; }
+  /* FIX: only make the active language's span a block; keep the inactive one hidden */
+  .addr-text .en{ display:block; }
+  .addr-text .dv{ display:none; }
   body.lang-dv .addr-text .dv{ display:block; }
+  body.lang-dv .addr-text .en{ display:none; }
   table{
     width:100%;
     border-collapse:collapse;
