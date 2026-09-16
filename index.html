@@ -83,6 +83,9 @@
   html[dir="rtl"] .totals {
     justify-content: flex-start;
   }
+  html[dir="rtl"] .totals-discount-action {
+    text-align: left;
+  }
   html[dir="rtl"] .payment {
     border-left: none;
     border-right: 3px solid var(--ink);
@@ -489,7 +492,8 @@
   .rendering-pdf .col-action,
   .rendering-pdf .table-actions,
   .rendering-pdf .conditions-toggle-container,
-  .rendering-pdf .btn-toggle-conditions {
+  .rendering-pdf .btn-toggle-conditions,
+  .rendering-pdf .totals-discount-action {
     display: none !important;
   }
 </style>
@@ -524,12 +528,12 @@
         </p>
         <div class="brand-details">
           <div>
-            <span class="en" contenteditable="true">Sinfia, Raiyvilla Magu, M. Muli</span>
-            <span class="dv" contenteditable="true">ސިންފިއާ، ރަތްވިލާ މަގު، މ. މުލި</span>
+            <span class="en" contenteditable="true">Sinfia, Raiyvilla Magu, Muli</span>
+            <span class="dv" contenteditable="true">ސިންފިއާ، ރައިވިއްލާ މަގު، މުލި</span>
           </div>
           <div>
-            <span class="en" contenteditable="true">7900319 / 0000000</span>
-            <span class="dv" contenteditable="true">7900319 / 0000000</span>
+            <span class="en" contenteditable="true">+960 7900319 / 0000000</span>
+            <span class="dv" contenteditable="true">+960 7900319 / 0000000</span>
           </div>
           <div>
             <span class="en" contenteditable="true">info@sinfia.net</span>
@@ -637,11 +641,16 @@
       </tbody>
     </table>
 
-    <div class="table-actions no-print">
+    <div class="table-actions no-print" style="display: flex; gap: 8px; flex-wrap: wrap;">
       <button type="button" class="btn-add-item" onclick="addRow()">
         <span>+</span>
         <span class="en">Add Line Item</span>
         <span class="dv">އައިޓަމެއް އިތުރުކުރޭ</span>
+      </button>
+      <button type="button" class="btn-add-item" onclick="addDiscountItemRow()">
+        <span>+</span>
+        <span class="en">Add Discount Line</span>
+        <span class="dv">ޑިސްކައުންޓް ލައިނެއް އިތުރުކުރޭ</span>
       </button>
     </div>
 
@@ -654,6 +663,14 @@
             <span class="dv">ޖުމްލަ އަގު</span>
           </span>
           <span class="val" id="subtotalVal">MVR 4,000.00</span>
+        </div>
+        <div class="totals-row" id="discountRow" style="display: flex;">
+          <span style="display: inline-flex; align-items: center; gap: 6px;">
+            <span class="en">Discount</span>
+            <span class="dv">ޑިސްކައުންޓް</span>
+            <button type="button" class="btn-del-row no-print" onclick="toggleDiscount(false)" title="Hide discount" style="padding: 1px 5px; font-size: 11px;">✕</button>
+          </span>
+          <span class="val" id="discountVal" contenteditable="true" oninput="recalc()" onfocus="formatDiscountFocus()" onblur="formatDiscountBlur()">0.00</span>
         </div>
         <div class="totals-row">
           <span>
@@ -668,6 +685,13 @@
             <span class="dv">ދައްކަންޖެހޭ ޖުމްލަ</span>
           </span>
           <span class="val" id="grandTotalVal">MVR 4,320.00</span>
+        </div>
+        <div class="no-print totals-discount-action" id="discountBtnWrapper" style="display: none; text-align: right; margin-top: 6px;">
+          <button type="button" class="btn-add-condition" onclick="toggleDiscount(true)" style="font-size: 11px; padding: 3px 8px;">
+            <span>+</span>
+            <span class="en">Add Discount</span>
+            <span class="dv">ޑިސްކައުންޓް އިތުރުކުރޭ</span>
+          </button>
         </div>
       </div>
     </div>
@@ -691,8 +715,8 @@
       <div class="payment-row">
         <span class="k"><span class="en">Bank Name</span><span class="dv">ބޭންކުގެ ނަން</span></span>
         <span class="v">
-          <span class="en" contenteditable="true">Bank Name</span>
-          <span class="dv" contenteditable="true">ބޭންކު ގެ ނަން</span>
+          <span class="en" contenteditable="true">Bank of Maldives (BML)</span>
+          <span class="dv" contenteditable="true">ބޭންކް އޮފް މޯލްޑިވްސް (ބީ.އެމް.އެލް)</span>
         </span>
       </div>
       <div class="payment-row">
@@ -704,7 +728,7 @@
       </div>
       <div class="payment-row">
         <span class="k"><span class="en">Account No. (MVR)</span><span class="dv">އެކައުންޓް ނަންބަރު (ރުފިޔާ)</span></span>
-        <span class="v" contenteditable="true">0000 000000 000</span>
+        <span class="v" contenteditable="true">7704 000000 001</span>
       </div>
     </div>
 
@@ -757,6 +781,40 @@
       }
     }
 
+    /* --- Optional Discount Toggle & Formatting --- */
+    let hasDiscount = true;
+
+    function toggleDiscount(show) {
+      hasDiscount = show;
+      const row = document.getElementById('discountRow');
+      const btnWrapper = document.getElementById('discountBtnWrapper');
+      const discEl = document.getElementById('discountVal');
+      if (show) {
+        row.style.display = 'flex';
+        btnWrapper.style.display = 'none';
+        discEl.innerText = '0.00';
+        setTimeout(() => discEl.focus(), 50);
+      } else {
+        row.style.display = 'none';
+        btnWrapper.style.display = 'block';
+        discEl.innerText = '0.00';
+      }
+      recalc();
+    }
+
+    function formatDiscountFocus() {
+      const el = document.getElementById('discountVal');
+      const d = parseNum(el.innerText);
+      if (d > 0) el.innerText = d.toString();
+    }
+
+    function formatDiscountBlur() {
+      const el = document.getElementById('discountVal');
+      const d = parseNum(el.innerText);
+      el.innerText = d > 0 ? `- MVR ${formatMVR(d)}` : '0.00';
+      recalc();
+    }
+
     /* --- Language & Direction Switching --- */
     function setLang(lang) {
       const htmlRoot = document.getElementById('htmlRoot');
@@ -806,8 +864,17 @@
         subtotal += lineTotal;
       });
 
-      const gstAmount = subtotal * (currentGstRate / 100);
-      const grandTotal = subtotal + gstAmount;
+      let discount = 0;
+      if (hasDiscount) {
+        discount = parseNum(document.getElementById('discountVal').innerText);
+        if (discount > subtotal) {
+          discount = subtotal;
+        }
+      }
+
+      const taxableAmount = Math.max(0, subtotal - discount);
+      const gstAmount = taxableAmount * (currentGstRate / 100);
+      const grandTotal = taxableAmount + gstAmount;
 
       document.getElementById('subtotalVal').innerText = `MVR ${formatMVR(subtotal)}`;
       document.getElementById('gstVal').innerText = `MVR ${formatMVR(gstAmount)}`;
@@ -836,6 +903,26 @@
         <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
         <td class="num item-price" contenteditable="true" oninput="recalc()">0.00</td>
         <td class="num item-total font-semibold">0.00</td>
+      `;
+      tbody.appendChild(tr);
+      recalc();
+    }
+
+    function addDiscountItemRow() {
+      const tbody = document.getElementById('itemsBody');
+      const tr = document.createElement('tr');
+      tr.className = 'item-row item-discount-row';
+      tr.innerHTML = `
+        <td class="col-action no-print">
+          <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
+        </td>
+        <td>
+          <span class="en" contenteditable="true">Discount / Special Allowance</span>
+          <span class="dv" contenteditable="true">ޑިސްކައުންޓް / ޚާއްޞަ ލުއި</span>
+        </td>
+        <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
+        <td class="num item-price" style="color: #dc2626;" contenteditable="true" oninput="recalc()">-100.00</td>
+        <td class="num item-total font-semibold" style="color: #dc2626;">-100.00</td>
       `;
       tbody.appendChild(tr);
       recalc();
