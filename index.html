@@ -81,7 +81,7 @@
     text-align: left;
   }
   html[dir="rtl"] .totals {
-    justify-content: flex-start;
+    justify-content: flex-end;
   }
   html[dir="rtl"] .totals-discount-action {
     text-align: left;
@@ -159,6 +159,70 @@
     transform: none;
   }
   .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* --- Logo Upload --- */
+  .logo-wrap {
+    margin-bottom: 14px;
+  }
+  .logo-box {
+    width: 160px;
+    height: 80px;
+    border: 1px dashed #9ca3af;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    overflow: hidden;
+    position: relative;
+    background: #fff;
+  }
+  .logo-box:hover {
+    border-color: var(--ink);
+    background: var(--surface);
+  }
+  .logo-box.has-logo {
+    cursor: default;
+    border-style: solid;
+    border-color: var(--line);
+  }
+  .logo-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: none;
+  }
+  .logo-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background: rgba(255,255,255,0.92);
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    padding: 0;
+  }
+  .logo-box.has-logo .logo-remove { display: flex; }
+  .logo-box.has-logo:hover .logo-remove { color: var(--danger); border-color: var(--danger); }
+  .logo-input { display: none; }
+  .logo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    line-height: 1.4;
+  }
 
   /* --- Main Invoice Sheet --- */
   .sheet {
@@ -419,11 +483,43 @@
   .no-print {
     display: block;
   }
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
   @media print {
-    body { background: #fff; padding: 0; }
+    html, body {
+      width: 210mm;
+      background: #fff;
+      padding: 0;
+    }
     .toolbar, .no-print, .col-action, .btn-del-row, .table-actions { display: none !important; }
-    .sheet { box-shadow: none; max-width: 100%; padding: 24px 32px; border-radius: 0; }
+    .sheet {
+      box-shadow: none;
+      width: 100%;
+      max-width: 100%;
+      padding: 6mm 4mm;
+      border-radius: 0;
+    }
     [contenteditable="true"]:hover, [contenteditable="true"]:focus { outline: none !important; }
+    .logo-box { border: none !important; background: transparent !important; }
+    .logo-box:not(.has-logo) { display: none !important; }
+
+    /* Tighten spacing so a typical invoice fits on one A4 page */
+    .top { padding-bottom: 16px; margin-bottom: 18px; }
+    .addresses { margin-bottom: 20px; }
+    .totals { margin-bottom: 20px; }
+    .amount-words { margin: -10px 0 18px 0; }
+    .payment { padding: 12px 18px; margin-bottom: 18px; }
+    .note { padding-top: 12px; }
+    .conditions-box { margin-top: 10px; padding-top: 10px; }
+    td { padding: 8px 8px 8px 0; }
+    th { padding: 6px 8px 6px 0; }
+
+    /* Avoid awkward splits across the page boundary */
+    .top, .addresses, table, .totals, .payment, .note, .conditions-box {
+      page-break-inside: avoid;
+    }
   }
 
   /* --- Condition Note (Optional) --- */
@@ -496,6 +592,23 @@
   .rendering-pdf .totals-discount-action {
     display: none !important;
   }
+  .rendering-pdf .logo-box {
+    border: none !important;
+    background: transparent !important;
+  }
+  .rendering-pdf .logo-box:not(.has-logo) {
+    display: none !important;
+  }
+  .rendering-pdf .top { padding-bottom: 16px; margin-bottom: 18px; }
+  .rendering-pdf .addresses { margin-bottom: 20px; }
+  .rendering-pdf .totals { margin-bottom: 20px; }
+  .rendering-pdf .amount-words { margin: -10px 0 18px 0; }
+  .rendering-pdf .payment { padding: 12px 18px; margin-bottom: 18px; }
+  .rendering-pdf .note { padding-top: 12px; }
+  .rendering-pdf .conditions-box { margin-top: 10px; padding-top: 10px; }
+  .rendering-pdf td { padding: 8px 8px 8px 0; }
+  .rendering-pdf th { padding: 6px 8px 6px 0; }
+  .rendering-pdf .sheet { padding: 6mm 4mm; box-shadow: none; }
 </style>
 </head>
 <body class="lang-en" id="bodyRoot">
@@ -522,6 +635,16 @@
     <!-- Header / Brand Section -->
     <div class="top">
       <div>
+        <div class="logo-wrap">
+          <div class="logo-box" id="logoBox" onclick="triggerLogoUpload()" title="Click to add your company logo">
+            <span class="logo-placeholder no-print" id="logoPlaceholder">
+              <span class="en">+ Add Logo</span><span class="dv">+ ލޯގޯ އިތުރުކުރޭ</span>
+            </span>
+            <img id="logoImg" src="" alt="Company Logo">
+            <button type="button" class="logo-remove no-print" id="logoRemoveBtn" onclick="removeLogo(event)" title="Remove logo">✕</button>
+          </div>
+          <input type="file" id="logoInput" class="logo-input no-print" accept="image/*" onchange="handleLogoUpload(event)">
+        </div>
         <p class="brand">
           <span class="en" contenteditable="true">YOUR COMPANY NAME</span>
           <span class="dv" contenteditable="true">ވިޔަފާރި / ކުންފުނީގެ ނަން</span>
@@ -768,6 +891,42 @@
   <script>
     let currentGstRate = 8.0; // Default Maldivian GST rate
 
+    /* --- Logo Upload --- */
+    function triggerLogoUpload() {
+      const box = document.getElementById('logoBox');
+      if (!box.classList.contains('has-logo')) {
+        document.getElementById('logoInput').click();
+      }
+    }
+
+    function handleLogoUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const img = document.getElementById('logoImg');
+        img.src = ev.target.result;
+        img.style.display = 'block';
+        document.getElementById('logoPlaceholder').style.display = 'none';
+        document.getElementById('logoBox').classList.add('has-logo');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeLogo(e) {
+      e.stopPropagation();
+      const img = document.getElementById('logoImg');
+      img.src = '';
+      img.style.display = 'none';
+      document.getElementById('logoPlaceholder').style.display = 'flex';
+      document.getElementById('logoBox').classList.remove('has-logo');
+      document.getElementById('logoInput').value = '';
+    }
+
     /* --- Optional Condition Note Toggle --- */
     function toggleConditions(show) {
       const block = document.getElementById('conditionsBlock');
@@ -979,7 +1138,7 @@
 
     function getPdfOptions() {
       return {
-        margin: [10, 10, 10, 10],
+        margin: [14, 14, 14, 14],
         filename: pdfFilename(),
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: {
