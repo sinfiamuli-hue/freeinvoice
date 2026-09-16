@@ -622,11 +622,11 @@
     <div class="spacer"></div>
     <button class="btn" id="downloadBtn" onclick="downloadPDF()" title="Download as A4 PDF">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
-      <span class="en">Download PDF</span><span class="dv">ޕީޑީއެފް ޑައުންލޯޑް</span>
+      <span class="en" id="downloadBtnTextEn">Download PDF</span><span class="dv" id="downloadBtnTextDv">ޕީޑީއެފް ޑައުންލޯޑް</span>
     </button>
     <button class="btn secondary" id="waBtn" onclick="shareWhatsApp()" title="Share invoice via WhatsApp">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.54 2 12.04 2zm0 18.02h-.01a8.27 8.27 0 01-4.22-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.24 8.24 0 01-1.27-4.4c0-4.55 3.71-8.26 8.27-8.26 2.21 0 4.28.86 5.84 2.42a8.2 8.2 0 012.42 5.84c0 4.56-3.71 8.27-8.23 8.27zm4.52-6.2c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.16.25-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01s-.43.06-.66.31c-.23.25-.86.85-.86 2.06 0 1.22.89 2.4 1.01 2.56.12.16 1.75 2.67 4.24 3.74.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
-      <span class="en">WhatsApp</span><span class="dv">ވަޓްސްއަޕް</span>
+      <span class="en" id="waBtnTextEn">WhatsApp</span><span class="dv" id="waBtnTextDv">ވަޓްސްއަޕް</span>
     </button>
   </div>
 
@@ -1008,6 +1008,14 @@
 
     /* --- Real-Time Calculations --- */
     function recalc() {
+      if (typeof pendingDownload !== 'undefined' && pendingDownload) {
+        pendingDownload = null;
+        if (document.getElementById('downloadBtnTextEn')) resetDownloadBtn();
+      }
+      if (typeof pendingShare !== 'undefined' && pendingShare) {
+        pendingShare = null;
+        if (document.getElementById('waBtnTextEn')) resetWaBtn();
+      }
       const rows = document.querySelectorAll('#itemsBody .item-row');
       let subtotal = 0;
 
@@ -1238,56 +1246,77 @@
     function resetDownloadBtn() {
       const btn = document.getElementById('downloadBtn');
       btn.disabled = false;
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg> <span class="en">Download PDF</span><span class="dv">ޕީޑީއެފް ޑައުންލޯޑް</span>`;
+      document.getElementById('downloadBtnTextEn').textContent = 'Download PDF';
+      document.getElementById('downloadBtnTextDv').textContent = 'ޕީޑީއެފް ޑައުންލޯޑް';
     }
+
+    let pendingDownload = null; // { blob, filename } once generated, awaiting the confirming tap
 
     async function downloadPDF() {
       const btn = document.getElementById('downloadBtn');
+
+      // Second tap: a fresh, direct user gesture — save immediately so strict
+      // mobile browsers (iOS Safari, Android Chrome) don't block it.
+      if (pendingDownload) {
+        const { blob, filename } = pendingDownload;
+        pendingDownload = null;
+        btn.disabled = true;
+        document.getElementById('downloadBtnTextEn').textContent = 'Saving…';
+        document.getElementById('downloadBtnTextDv').textContent = 'ސޭވް ކުރަނީ…';
+        const ok = await saveFile(filename, blob);
+        resetDownloadBtn();
+        if (!ok) alert('Could not save the file — please try again.');
+        return;
+      }
+
+      // First tap: generate the PDF (this takes a moment, which is exactly
+      // why we don't try to save in the same step on mobile).
       btn.disabled = true;
-      btn.innerText = 'Generating…';
+      document.getElementById('downloadBtnTextEn').textContent = 'Generating…';
+      document.getElementById('downloadBtnTextDv').textContent = 'ތައްޔާރުކުރަނީ…';
       const el = document.getElementById('invoiceSheet');
       const filename = pdfFilename();
 
       document.body.classList.add('rendering-pdf');
-
       try {
         await document.fonts.ready;
         const pdf = await buildSinglePagePdf(el);
-        document.body.classList.remove('rendering-pdf');
-
         const blob = pdf.output('blob');
-        await saveFile(filename, blob);
+        pendingDownload = { blob, filename };
+        btn.disabled = false;
+        document.getElementById('downloadBtnTextEn').textContent = 'Tap to Save PDF';
+        document.getElementById('downloadBtnTextDv').textContent = 'ސޭވް ކުރަން ފިތާލާ';
       } catch (err) {
         console.error(err);
+        resetDownloadBtn();
+        alert('Could not generate the PDF — please try again.');
       } finally {
         document.body.classList.remove('rendering-pdf');
-        resetDownloadBtn();
       }
     }
 
     /* --- WhatsApp Share --- */
+    function resetWaBtn() {
+      const btn = document.getElementById('waBtn');
+      btn.disabled = false;
+      document.getElementById('waBtnTextEn').textContent = 'WhatsApp';
+      document.getElementById('waBtnTextDv').textContent = 'ވަޓްސްއަޕް';
+    }
+
+    let pendingShare = null; // { blob, filename } once generated, awaiting the confirming tap
+
     async function shareWhatsApp() {
       const btn = document.getElementById('waBtn');
-      btn.disabled = true;
-      btn.innerText = 'Preparing…';
-      const el = document.getElementById('invoiceSheet');
-      const filename = pdfFilename();
 
-      document.body.classList.add('rendering-pdf');
+      // Second tap: fresh gesture — share/save immediately.
+      if (pendingShare) {
+        const { blob, filename } = pendingShare;
+        pendingShare = null;
+        btn.disabled = true;
+        document.getElementById('waBtnTextEn').textContent = 'Sharing…';
+        document.getElementById('waBtnTextDv').textContent = 'ޝެއަރ ކުރަނީ…';
 
-      function resetWaBtn() {
-        btn.disabled = false;
-        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.54 2 12.04 2zm0 18.02h-.01a8.27 8.27 0 01-4.22-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.24 8.24 0 01-1.27-4.4c0-4.55 3.71-8.26 8.27-8.26 2.21 0 4.28.86 5.84 2.42a8.2 8.2 0 012.42 5.84c0 4.56-3.71 8.27-8.23 8.27zm4.52-6.2c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.16.25-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01s-.43.06-.66.31c-.23.25-.86.85-.86 2.06 0 1.22.89 2.4 1.01 2.56.12.16 1.75 2.67 4.24 3.74.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg> <span class="en">WhatsApp</span><span class="dv">ވަޓްސްއަޕް</span>`;
-      }
-
-      try {
-        await document.fonts.ready;
-        const pdf = await buildSinglePagePdf(el);
-        document.body.classList.remove('rendering-pdf');
-
-        const blob = pdf.output('blob');
         const file = new File([blob], filename, { type: 'application/pdf' });
-
         let sharedDirectly = false;
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
@@ -1301,17 +1330,37 @@
             // viewer cancelled the native share sheet, or it isn't usable here — fall back below
           }
         }
-
         if (!sharedDirectly) {
           await saveFile(filename, blob);
           const msg = encodeURIComponent('Invoice attached: ' + filename + ' (Please attach the downloaded PDF file)');
           window.open('https://wa.me/?text=' + msg, '_blank');
         }
+        resetWaBtn();
+        return;
+      }
+
+      // First tap: generate the PDF.
+      btn.disabled = true;
+      document.getElementById('waBtnTextEn').textContent = 'Preparing…';
+      document.getElementById('waBtnTextDv').textContent = 'ތައްޔާރުކުރަނީ…';
+      const el = document.getElementById('invoiceSheet');
+      const filename = pdfFilename();
+
+      document.body.classList.add('rendering-pdf');
+      try {
+        await document.fonts.ready;
+        const pdf = await buildSinglePagePdf(el);
+        const blob = pdf.output('blob');
+        pendingShare = { blob, filename };
+        btn.disabled = false;
+        document.getElementById('waBtnTextEn').textContent = 'Tap to Share';
+        document.getElementById('waBtnTextDv').textContent = 'ޝެއަރ ކުރަން ފިތާލާ';
       } catch (err) {
         console.error(err);
+        resetWaBtn();
+        alert('Could not prepare the file — please try again.');
       } finally {
         document.body.classList.remove('rendering-pdf');
-        resetWaBtn();
       }
     }
 
