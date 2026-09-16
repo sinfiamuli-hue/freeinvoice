@@ -423,10 +423,73 @@
     [contenteditable="true"]:hover, [contenteditable="true"]:focus { outline: none !important; }
   }
 
+  /* --- Condition Note (Optional) --- */
+  .conditions-box {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .conditions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  body.lang-dv .conditions-header {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .conditions-text .en { display: block; }
+  .conditions-text .dv { display: none; }
+  body.lang-dv .conditions-text .dv { display: block; }
+  body.lang-dv .conditions-text .en { display: none; }
+  .btn-toggle-conditions {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .btn-toggle-conditions:hover {
+    color: var(--danger);
+    background: #fee2e2;
+  }
+  .btn-add-condition {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px dashed #9ca3af;
+    color: var(--muted);
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-add-condition:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+    background: var(--surface);
+  }
+
   /* Dedicated styling when rendering PDF clone */
   .rendering-pdf .no-print,
   .rendering-pdf .col-action,
-  .rendering-pdf .table-actions {
+  .rendering-pdf .table-actions,
+  .rendering-pdf .conditions-toggle-container,
+  .rendering-pdf .btn-toggle-conditions {
     display: none !important;
   }
 </style>
@@ -461,12 +524,12 @@
         </p>
         <div class="brand-details">
           <div>
-            <span class="en" contenteditable="true">Sinfia, Raiyvilla Magu, M.Muli'</span>
-            <span class="dv" contenteditable="true">ސިންފިއަ، ރަތްވިލާ މަގު، މ.މުލި</span>
+            <span class="en" contenteditable="true">Sinfia, Raiyvilla Magu, Muli</span>
+            <span class="dv" contenteditable="true">ސިންފިއާ، ރައިވިއްލާ މަގު، މުލި</span>
           </div>
           <div>
-            <span class="en" contenteditable="true">7900319 / 000000</span>
-            <span class="dv" contenteditable="true">7900319 / 000000</span>
+            <span class="en" contenteditable="true">+960 7900319 / 0000000</span>
+            <span class="dv" contenteditable="true">+960 7900319 / 0000000</span>
           </div>
           <div>
             <span class="en" contenteditable="true">info@sinfia.net</span>
@@ -488,6 +551,10 @@
           <div>
             <span class="en">Invoice No:</span><span class="dv">އިންވޮއިސް ނަންބަރު:</span>
             <span class="val" id="invoiceNo" contenteditable="true">INV-2026-001</span>
+          </div>
+          <div>
+            <span class="en">PO No:</span><span class="dv">ޕީ.އޯ ނަންބަރު:</span>
+            <span class="val" contenteditable="true">PO-2026-001</span>
           </div>
           <div>
             <span class="en">Date:</span><span class="dv">ތާރީޚު:</span>
@@ -608,10 +675,10 @@
     <!-- Amount in Words -->
     <div class="amount-words">
       <span class="en">Amount in Words:</span>
-      <span class="dv">ފައިސާގެ ޢަދަދު :</span>
+      <span class="dv">ފައިސާގެ ޢަދަދު ބަހުން:</span>
       <span class="val">
-        <span class="en" id="wordsEn" contenteditable="true">Four Thousand Three Hundred Twenty Maldivian Rufiyaa </span>
-        <span class="dv" id="wordsDv" contenteditable="true">ހަތަރު ހާސް ތިންސަތޭކަ ވިހި ރުފިޔާ </span>
+        <span class="en" id="wordsEn" contenteditable="true">Four Thousand Three Hundred Twenty Maldivian Rufiyaa Only</span>
+        <span class="dv" id="wordsDv" contenteditable="true">ހަތަރު ހާސް ތިންސަތޭކަ ވިހި ރުފިޔާ ހަމައެކަނި</span>
       </span>
     </div>
 
@@ -624,8 +691,8 @@
       <div class="payment-row">
         <span class="k"><span class="en">Bank Name</span><span class="dv">ބޭންކުގެ ނަން</span></span>
         <span class="v">
-          <span class="en" contenteditable="true">Name of the Bank</span>
-          <span class="dv" contenteditable="true">ބޭންކް ގެ ނަން</span>
+          <span class="en" contenteditable="true">Bank of Maldives (BML)</span>
+          <span class="dv" contenteditable="true">ބޭންކް އޮފް މޯލްޑިވްސް (ބީ.އެމް.އެލް)</span>
         </span>
       </div>
       <div class="payment-row">
@@ -646,11 +713,49 @@
       <span class="en" contenteditable="true">Note: This is a computer-generated invoice and does not require a physical signature. Payments are requested to be made via bank transfer to the account stated above within 14 days of issue.</span>
       <span class="dv" contenteditable="true">ނޯޓު: މިއީ ކޮމްޕިއުޓަރުން ތައްޔާރުކުރެވިފައިވާ ރަސްމީ އިންވޮއިސްއަކަށް ވާތީ ސޮއިކުރަން ނުޖެހޭނެއެވެ. މި އިންވޮއިސްއާ ގުޅޭގޮތުން އެއްވެސް މަޢުލޫމާތެއް ސާފުކުރައްވަން ބޭނުންފުޅުނަމަ، މަތީގައިވާ ފޯނު ނަންބަރަށް ގުޅުއްވުން އެދެމެވެ.</span>
     </div>
+
+    <!-- Condition Note (Optional / If needed) -->
+    <div class="conditions-box" id="conditionsBlock">
+      <div class="conditions-header">
+        <span>
+          <span class="en">Terms & Conditions / Special Notes:</span>
+          <span class="dv">ޝަރުޠުތައް / ޚާއްޞަ ނޯޓު:</span>
+        </span>
+        <button type="button" class="btn-toggle-conditions no-print" onclick="toggleConditions(false)" title="Hide condition note if not needed">
+          <span class="en">✕ Hide Note</span><span class="dv">✕ ނޯޓު ފޮރުވާ</span>
+        </button>
+      </div>
+      <div class="conditions-text">
+        <span class="en" contenteditable="true">1. Goods / Services received in satisfactory condition.<br>2. Invoices past due date may incur additional administrative charges.<br>3. Inquiries regarding this invoice must be notified within 7 days of issue.</span>
+        <span class="dv" contenteditable="true">1. މުދާ ނުވަތަ ޚިދުމަތް ލިބިގަނެވުނީ އެދެވޭ ފެންވަރެއްގައެވެ.<br>2. ދައްކަންޖެހޭ މުއްދަތު ހަމަވުމަށްފަހު ފައިސާ ނުދައްކައިފިނަމަ އިތުރު އިދާރީ ފީއެއް ނެގިދާނެއެވެ.<br>3. މި އިންވޮއިސްއާ ގުޅޭ އެއްވެސް ޝަކުވާއެއްވާނަމަ ދޫކުރިތާ 7 ދުވަހުގެ ތެރޭގައި އެންގެވުން އެދެމެވެ.</span>
+      </div>
+    </div>
+
+    <div class="conditions-toggle-container no-print" id="conditionsAddBtnWrapper" style="display: none; margin-top: 14px; text-align: center;">
+      <button type="button" class="btn-add-condition" onclick="toggleConditions(true)">
+        <span>+</span>
+        <span class="en">Add Condition Note</span>
+        <span class="dv">ޝަރުޠު ނޯޓެއް އިތުރުކުރޭ</span>
+      </button>
+    </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
     let currentGstRate = 8.0; // Default Maldivian GST rate
+
+    /* --- Optional Condition Note Toggle --- */
+    function toggleConditions(show) {
+      const block = document.getElementById('conditionsBlock');
+      const addBtnWrapper = document.getElementById('conditionsAddBtnWrapper');
+      if (show) {
+        block.style.display = 'block';
+        addBtnWrapper.style.display = 'none';
+      } else {
+        block.style.display = 'none';
+        addBtnWrapper.style.display = 'block';
+      }
+    }
 
     /* --- Language & Direction Switching --- */
     function setLang(lang) {
