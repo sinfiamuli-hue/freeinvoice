@@ -1,8 +1,13 @@
 <!DOCTYPE html>
-<html lang="en" id="htmlRoot">
+<html lang="en" id="htmlRoot" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<title>Invoice Sample Template (English / Dhivehi)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice - Bilingual (English / ދިވެހި)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Google Fonts fallback for Thaana / Dhivehi -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thaana:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   @font-face {
     font-family: 'Faruma';
@@ -12,503 +17,892 @@
     font-style: normal;
     font-display: swap;
   }
-  :root{
-    --ink:#000000;
-    --muted:#000000;
-    --line:#e2e2e2;
-    --bg:#ffffff;
-    --accent:#000000;
-  }
-  *{box-sizing:border-box;}
-  body{
-    margin:0;
-    background:#f4f4f2;
-    font-family:'Helvetica Neue', Arial, sans-serif;
-    color:var(--ink);
-    display:flex;
-    justify-content:center;
-    padding:40px 16px;
+
+  :root {
+    --ink: #111827;
+    --muted: #4b5563;
+    --line: #e5e7eb;
+    --bg: #ffffff;
+    --surface: #f9fafb;
+    --accent: #2563eb;
+    --danger: #ef4444;
+    --font-en: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    --font-dv: 'Faruma', 'Noto Sans Thaana', 'MV Boli', sans-serif;
   }
 
-  /* --- language switching --- */
-  .en{ display:inline; }
-  .dv{
-    font-family:'Faruma', sans-serif;
-    direction:rtl;
-    unicode-bidi:isolate;
-    display:none;
-  }
-  body.lang-dv .en{ display:none; }
-  body.lang-dv .dv{ display:inline; }
+  * { box-sizing: border-box; }
 
-  .lang-switch{
-    display:inline-flex;
-    border:1px solid var(--ink);
-    border-radius:6px;
-    overflow:hidden;
-  }
-  .lang-switch button{
-    font-family:'Helvetica Neue', Arial, sans-serif;
-    font-size:13px;
-    font-weight:600;
-    padding:10px 16px;
-    border:none;
-    background:#fff;
-    color:var(--ink);
-    cursor:pointer;
-  }
-  .lang-switch button.active{
-    background:var(--ink);
-    color:#fff;
-  }
-  .lang-switch button:not(:last-child){
-    border-right:1px solid var(--ink);
+  body {
+    margin: 0;
+    background: #f3f4f6;
+    font-family: var(--font-en);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+    min-height: 100vh;
   }
 
-  .sheet{
-    background:var(--bg);
-    width:100%;
-    max-width:760px;
-    padding:56px 56px 40px;
-    box-shadow:0 1px 4px rgba(0,0,0,0.08);
+  /* --- Language & Direction Switching --- */
+  .en { display: inline; }
+  .dv {
+    font-family: var(--font-dv);
+    direction: rtl;
+    unicode-bidi: isolate;
+    display: none;
   }
-  .top{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    border-bottom:2px solid var(--ink);
-    padding-bottom:24px;
-    margin-bottom:32px;
+
+  body.lang-dv {
+    font-family: var(--font-dv);
   }
-  .brand{
-    font-size:26px;
-    letter-spacing:2px;
-    font-weight:700;
-    margin:0 0 8px 0;
+  body.lang-dv .en { display: none !important; }
+  body.lang-dv .dv { display: inline !important; }
+
+  /* RTL Specific Alignments */
+  html[dir="rtl"] body {
+    direction: rtl;
   }
-  .brand .dv{ letter-spacing:0; }
-  .brand-details{
-    font-size:13px;
-    color:var(--muted);
-    line-height:1.6;
+  html[dir="rtl"] .toolbar {
+    flex-direction: row-reverse;
   }
-  .brand-details > div{ margin-bottom:2px; }
-  .invoice-label{
-    text-align:right;
+  html[dir="rtl"] .invoice-label {
+    text-align: left;
   }
-  .invoice-label h1{
-    font-size:20px;
-    margin:0 0 8px 0;
-    letter-spacing:1px;
-    font-weight:600;
+  html[dir="rtl"] .top {
+    flex-direction: row-reverse;
   }
-  .meta{
-    font-size:13px;
-    color:var(--muted);
-    line-height:1.6;
+  html[dir="rtl"] th:not(.num),
+  html[dir="rtl"] td:not(.num) {
+    text-align: right;
   }
-  .meta span.val{
-    color:var(--ink);
-    font-weight:600;
+  html[dir="rtl"] th.num,
+  html[dir="rtl"] td.num {
+    text-align: left;
   }
-  .addresses{
-    display:flex;
-    justify-content:space-between;
-    margin-bottom:40px;
+  html[dir="rtl"] .totals {
+    justify-content: flex-start;
   }
-  .addr-block{
-    max-width:48%;
+  html[dir="rtl"] .payment {
+    border-left: none;
+    border-right: 3px solid var(--ink);
   }
-  .addr-label{
-    font-size:11px;
-    letter-spacing:1.5px;
-    color:var(--muted);
-    text-transform:uppercase;
-    margin-bottom:8px;
+  html[dir="rtl"] .payment-row {
+    flex-direction: row;
   }
-  body.lang-dv .addr-label{ text-transform:none; letter-spacing:0; }
-  .addr-name{
-    font-size:15px;
-    font-weight:600;
-    margin-bottom:4px;
+
+  /* --- Top Toolbar --- */
+  .toolbar {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-bottom: 16px;
   }
-  .addr-text{
-    font-size:13px;
-    color:var(--muted);
-    line-height:1.6;
+  .toolbar .spacer { flex: 1; }
+
+  .lang-switch {
+    display: inline-flex;
+    border: 1px solid var(--ink);
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
   }
-  /* FIX: only make the active language's span a block; keep the inactive one hidden */
-  .addr-text .en{ display:block; }
-  .addr-text .dv{ display:none; }
-  body.lang-dv .addr-text .dv{ display:block; }
-  body.lang-dv .addr-text .en{ display:none; }
-  table{
-    width:100%;
-    border-collapse:collapse;
-    margin-bottom:32px;
+  .lang-switch button {
+    font-family: var(--font-en);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border: none;
+    background: #fff;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
   }
-  thead tr{
-    border-bottom:1px solid var(--ink);
+  .lang-switch button.active {
+    background: var(--ink);
+    color: #fff;
   }
-  th{
-    text-align:left;
-    font-size:11px;
-    letter-spacing:1px;
-    text-transform:uppercase;
-    color:var(--muted);
-    padding:0 0 10px 0;
-    font-weight:600;
+  .lang-switch button:not(:last-child) {
+    border-right: 1px solid var(--ink);
   }
-  body.lang-dv th{ text-transform:none; letter-spacing:0; }
-  th.num, td.num{
-    text-align:right;
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid var(--ink);
+    background: var(--ink);
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
   }
-  td{
-    padding:16px 0;
-    font-size:14px;
-    border-bottom:1px solid var(--line);
+  .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn.secondary {
+    background: #25D366;
+    border-color: #25D366;
+    color: #fff;
   }
-  .totals{
-    display:flex;
-    justify-content:flex-end;
-    margin-bottom:40px;
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
   }
-  .totals-box{
-    width:260px;
+  .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+  /* --- Main Invoice Sheet --- */
+  .sheet {
+    background: var(--bg);
+    width: 100%;
+    max-width: 800px;
+    padding: 56px 56px 48px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    border-radius: 4px;
+    position: relative;
   }
-  .totals-row{
-    display:flex;
-    justify-content:space-between;
-    font-size:14px;
-    padding:8px 0;
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 24px;
+    margin-bottom: 28px;
   }
-  .totals-row.grand{
-    border-top:2px solid var(--ink);
-    margin-top:6px;
-    padding-top:14px;
-    font-size:16px;
-    font-weight:700;
+  .brand {
+    font-size: 26px;
+    letter-spacing: 1px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
   }
-  .amount-words{
-    font-size:12.5px;
-    color:var(--muted);
-    margin:-24px 0 36px 0;
+  .brand .dv { letter-spacing: 0; font-size: 24px; }
+  .brand-details {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
   }
-  .amount-words span.val{
-    color:var(--ink);
-    font-weight:600;
+  .brand-details > div { margin-bottom: 2px; }
+
+  .invoice-label {
+    text-align: right;
   }
-  .payment{
-    background:#f8f8f7;
-    padding:20px 24px;
-    margin-bottom:32px;
-    border-left:3px solid var(--ink);
+  .invoice-label h1 {
+    font-size: 22px;
+    margin: 0 0 8px 0;
+    letter-spacing: 1.5px;
+    font-weight: 700;
   }
-  .payment-label{
-    font-size:11px;
-    letter-spacing:1.5px;
-    color:var(--muted);
-    text-transform:uppercase;
-    margin-bottom:10px;
+  .meta {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
   }
-  body.lang-dv .payment-label{ text-transform:none; letter-spacing:0; text-align:right; }
-  body.lang-dv .payment-row{ flex-direction:row-reverse; }
-  body.lang-dv .payment-row .k{ text-align:right; }
-  body.lang-dv .payment-row .v{ text-align:right; }
-  .payment-row{
-    display:flex;
-    font-size:13px;
-    margin-bottom:4px;
+  .meta span.val {
+    color: var(--ink);
+    font-weight: 600;
   }
-  .payment-row .k{
-    width:170px;
-    color:var(--muted);
+
+  .addresses {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 32px;
   }
-  .payment-row .v{
-    font-weight:600;
+  .addr-block {
+    max-width: 50%;
   }
-  .note{
-    font-size:12px;
-    color:var(--muted);
-    line-height:1.7;
-    border-top:1px solid var(--line);
-    padding-top:20px;
+  .addr-label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    font-weight: 600;
   }
-  .note .dv{ display:none; }
-  body.lang-dv .note .dv{ display:block; }
-  body.lang-dv .note .en{ display:none; }
-  [contenteditable="true"]:hover{
-    outline:1px dashed #bbb;
-    outline-offset:2px;
-    cursor:text;
+  body.lang-dv .addr-label { text-transform: none; letter-spacing: 0; }
+  .addr-name {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
   }
-  [contenteditable="true"]:focus{
-    outline:1px solid var(--ink);
-    outline-offset:2px;
+  .addr-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
   }
-  .toolbar{
-    width:100%;
-    max-width:760px;
-    display:flex;
-    gap:10px;
-    align-items:center;
-    justify-content:flex-end;
-    margin-bottom:12px;
+  .addr-text .en { display: block; }
+  .addr-text .dv { display: none; }
+  body.lang-dv .addr-text .dv { display: block; }
+  body.lang-dv .addr-text .en { display: none; }
+
+  /* --- Items Table --- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
   }
-  .toolbar .spacer{ flex:1; }
-  .btn{
-    display:inline-flex;
-    align-items:center;
-    gap:8px;
-    padding:10px 18px;
-    font-family:'Helvetica Neue', Arial, sans-serif;
-    font-size:13px;
-    font-weight:600;
-    border-radius:6px;
-    border:1px solid var(--ink);
-    background:var(--ink);
-    color:#fff;
-    cursor:pointer;
-    transition:opacity .15s ease;
+  thead tr {
+    border-bottom: 2px solid var(--ink);
   }
-  .btn:hover{ opacity:.85; }
-  .btn.secondary{
-    background:#25D366;
-    border-color:#25D366;
-    color:#fff;
+  th {
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 10px 8px 10px 0;
+    font-weight: 600;
   }
-  .btn:disabled{
-    opacity:.5;
-    cursor:default;
+  body.lang-dv th { text-transform: none; letter-spacing: 0; }
+  th.num, td.num {
+    text-align: right;
+    white-space: nowrap;
   }
-  .btn svg{ width:15px; height:15px; flex-shrink:0; }
-  @media print{
-    body{background:#fff;padding:0;}
-    .toolbar{display:none;}
-    .sheet{box-shadow:none;max-width:100%;padding:24px 32px;}
-    [contenteditable="true"]:hover, [contenteditable="true"]:focus{outline:none;}
+  th.col-action, td.col-action {
+    width: 32px;
+    text-align: center;
+    padding: 0 4px;
+  }
+  td {
+    padding: 14px 8px 14px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+
+  .btn-del-row {
+    background: transparent;
+    border: none;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1;
+    transition: all 0.15s;
+  }
+  .btn-del-row:hover {
+    color: var(--danger);
+    background: #fee2e2;
+  }
+
+  .table-actions {
+    margin-bottom: 28px;
+  }
+  .btn-add-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px dashed #9ca3af;
+    color: var(--ink);
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-add-item:hover {
+    border-color: var(--ink);
+    background: var(--surface);
+  }
+
+  /* --- Totals Box --- */
+  .totals {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 32px;
+  }
+  .totals-box {
+    width: 290px;
+  }
+  .totals-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    padding: 8px 0;
+  }
+  .totals-row.grand {
+    border-top: 2px solid var(--ink);
+    margin-top: 6px;
+    padding-top: 14px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .gst-rate-edit {
+    cursor: pointer;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+
+  .amount-words {
+    font-size: 13px;
+    color: var(--muted);
+    margin: -16px 0 28px 0;
+    line-height: 1.6;
+  }
+  .amount-words span.val {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* --- Payment Details --- */
+  .payment {
+    background: var(--surface);
+    padding: 18px 24px;
+    margin-bottom: 28px;
+    border-left: 3px solid var(--ink);
+    border-radius: 4px;
+  }
+  .payment-label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  body.lang-dv .payment-label { text-transform: none; letter-spacing: 0; }
+  .payment-row {
+    display: flex;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .payment-row:last-child { margin-bottom: 0; }
+  .payment-row .k {
+    width: 170px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .payment-row .v {
+    font-weight: 600;
+  }
+
+  /* --- Footer Note --- */
+  .note {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    border-top: 1px solid var(--line);
+    padding-top: 18px;
+  }
+  .note .dv { display: none; }
+  body.lang-dv .note .dv { display: block; }
+  body.lang-dv .note .en { display: none; }
+
+  /* Editable Highlight */
+  [contenteditable="true"]:hover {
+    outline: 1px dashed #93c5fd;
+    outline-offset: 2px;
+    cursor: text;
+    border-radius: 2px;
+  }
+  [contenteditable="true"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+    background: #fff;
+  }
+
+  /* --- Print & PDF Media Styling --- */
+  .no-print {
+    display: block;
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .toolbar, .no-print, .col-action, .btn-del-row, .table-actions { display: none !important; }
+    .sheet { box-shadow: none; max-width: 100%; padding: 24px 32px; border-radius: 0; }
+    [contenteditable="true"]:hover, [contenteditable="true"]:focus { outline: none !important; }
+  }
+
+  /* Dedicated styling when rendering PDF clone */
+  .rendering-pdf .no-print,
+  .rendering-pdf .col-action,
+  .rendering-pdf .table-actions {
+    display: none !important;
   }
 </style>
 </head>
 <body class="lang-en" id="bodyRoot">
-  <div style="display:flex;flex-direction:column;align-items:center;width:100%;">
-  <div class="toolbar">
-    <div class="lang-switch" id="langSwitch">
-      <button type="button" class="active" data-lang="en" onclick="setLang('en')">EN</button>
-      <button type="button" data-lang="dv" onclick="setLang('dv')">DV</button>
+
+  <!-- Action Toolbar -->
+  <div class="toolbar no-print">
+    <div class="lang-switch" id="langSwitch" role="group" aria-label="Language selector">
+      <button type="button" class="active" data-lang="en" onclick="setLang('en')">English</button>
+      <button type="button" data-lang="dv" onclick="setLang('dv')">ދިވެހި</button>
     </div>
     <div class="spacer"></div>
-    <button class="btn" id="downloadBtn" onclick="downloadPDF()">
+    <button class="btn" id="downloadBtn" onclick="downloadPDF()" title="Download as A4 PDF">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
-      Download PDF
+      <span class="en">Download PDF</span><span class="dv">ޕީޑީއެފް ޑައުންލޯޑް</span>
     </button>
-    <button class="btn secondary" id="waBtn" onclick="shareWhatsApp()">
+    <button class="btn secondary" id="waBtn" onclick="shareWhatsApp()" title="Share invoice via WhatsApp">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.54 2 12.04 2zm0 18.02h-.01a8.27 8.27 0 01-4.22-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.24 8.24 0 01-1.27-4.4c0-4.55 3.71-8.26 8.27-8.26 2.21 0 4.28.86 5.84 2.42a8.2 8.2 0 012.42 5.84c0 4.56-3.71 8.27-8.23 8.27zm4.52-6.2c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.16.25-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01s-.43.06-.66.31c-.23.25-.86.85-.86 2.06 0 1.22.89 2.4 1.01 2.56.12.16 1.75 2.67 4.24 3.74.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
-      Share on WhatsApp
+      <span class="en">WhatsApp</span><span class="dv">ވަޓްސްއަޕް</span>
     </button>
   </div>
+
+  <!-- Printable Sheet Container -->
   <div class="sheet" id="invoiceSheet">
+    <!-- Header / Brand Section -->
     <div class="top">
       <div>
         <p class="brand">
-          <span class="en" contenteditable="true">[Your Company Name]</span><span class="dv" contenteditable="true">[ވިޔަފާރި / ކުންފުނީގެ ނަން]</span>
+          <span class="en" contenteditable="true">YOUR COMPANY NAME</span>
+          <span class="dv" contenteditable="true">ވިޔަފާރި / ކުންފުނީގެ ނަން</span>
         </p>
         <div class="brand-details">
-          <div><span class="en" contenteditable="true">[Address: Street, Island/City]</span><span class="dv" contenteditable="true">[އެޑްރެސް: މަގު، ރަށް / ސިޓީ]</span></div>
-          <div><span class="en" contenteditable="true">[Phone Number: 0000000]</span><span class="dv" contenteditable="true">[ފޯނު ނަންބަރު: 0000000]</span></div>
-          <div><span class="en" contenteditable="true">[Email Address: info@example.mv]</span><span class="dv" contenteditable="true">[އީމެއިލް އެޑްރެސް: info@example.mv]</span></div>
+          <div>
+            <span class="en" contenteditable="true">Sinfia, Raiyvilla Magu, M.Muli'</span>
+            <span class="dv" contenteditable="true">ސިންފިއަ، ރަތްވިލާ މަގު، މ.މުލި</span>
+          </div>
+          <div>
+            <span class="en" contenteditable="true">+960 790-0319 / +960 000-000</span>
+            <span class="dv" contenteditable="true">+960 790-0319 / +960 000-000</span>
+          </div>
+          <div>
+            <span class="en" contenteditable="true">info@sinfia.net</span>
+            <span class="dv" contenteditable="true">info@sinfia.net</span>
+          </div>
+          <div>
+            <span class="en">TIN / Reg: <span class="val" contenteditable="true">1001234GST001</span></span>
+            <span class="dv">ޓީ.އައި.އެން: <span class="val" contenteditable="true">1001234GST001</span></span>
+          </div>
         </div>
       </div>
+
       <div class="invoice-label">
-        <h1><span class="en">INVOICE</span><span class="dv">އިންވޮއިސް</span></h1>
+        <h1>
+          <span class="en">INVOICE</span>
+          <span class="dv">އިންވޮއިސް</span>
+        </h1>
         <div class="meta">
-          <div><span class="en">Invoice No</span><span class="dv">އިންވޮއިސް ނަންބަރު</span>: <span class="val" contenteditable="true">[00/0000]</span></div>
-          <div><span class="en">Date</span><span class="dv">ތާރީޚު</span>: <span class="val" contenteditable="true">[DD/MM/YYYY]</span></div>
+          <div>
+            <span class="en">Invoice No:</span><span class="dv">އިންވޮއިސް ނަންބަރު:</span>
+            <span class="val" id="invoiceNo" contenteditable="true">INV-2026-001</span>
+          </div>
+          <div>
+            <span class="en">Date:</span><span class="dv">ތާރީޚު:</span>
+            <span class="val" contenteditable="true">16/09/2026</span>
+          </div>
+          <div>
+            <span class="en">Due Date:</span><span class="dv">ދައްކަންޖެހޭ ތާރީޚު:</span>
+            <span class="val" contenteditable="true">30/09/2026</span>
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Billed To Section -->
     <div class="addresses">
       <div class="addr-block">
-        <div class="addr-label"><span class="en">Billed To</span><span class="dv">ބިލް ރައްދުވާ ފަރާތް</span></div>
+        <div class="addr-label">
+          <span class="en">Billed To</span>
+          <span class="dv">ބިލް ރައްދުވާ ފަރާތް</span>
+        </div>
         <div class="addr-name">
-          <span class="en" contenteditable="true">[Customer Name / Company Name]</span><span class="dv" contenteditable="true">[ކަސްޓަމަރުގެ ނަން / ކުންފުނީގެ ނަން]</span>
+          <span class="en" contenteditable="true">Client Name / Business Name</span>
+          <span class="dv" contenteditable="true">ކަސްޓަމަރުގެ ނަން / ކުންފުނީގެ ނަން</span>
         </div>
         <div class="addr-text">
-          <span class="en" contenteditable="true">[Address Line 1]<br>[Address Line 2]<br>[Island / Country]</span><span class="dv" contenteditable="true">[އެޑްރެސް ލައިން 1]<br>[އެޑްރެސް ލައިން 2]<br>[ރަށް / ޤައުމު]</span>
+          <span class="en" contenteditable="true">Male', Republic of Maldives<br>Phone: +960 999-0000<br>TIN: 1009999GST001</span>
+          <span class="dv" contenteditable="true">މާލެ، ދިވެހިރާއްޖެ<br>ފޯނު: 999-0000 960+<br>ޓީ.އައި.އެން: 1009999GST001</span>
         </div>
       </div>
     </div>
 
+    <!-- Line Items Table -->
     <table>
       <thead>
         <tr>
-          <th><span class="en">Description of Goods / Services</span><span class="dv">ޚިދުމަތުގެ / މުދަލުގެ ތަފްޞީލު</span></th>
-          <th class="num"><span class="en">Qty</span><span class="dv">އަދަދު</span></th>
-          <th class="num"><span class="en">Unit Price (MVR)</span><span class="dv">ވަކި އަގު (ރުފިޔާ)</span></th>
-          <th class="num"><span class="en">Total (MVR)</span><span class="dv">ޖުމްލަ އަގު (ރުފިޔާ)</span></th>
+          <th class="col-action no-print"></th>
+          <th>
+            <span class="en">Description of Goods / Services</span>
+            <span class="dv">ޚިދުމަތުގެ / މުދަލުގެ ތަފްޞީލު</span>
+          </th>
+          <th class="num" style="width: 75px;">
+            <span class="en">Qty</span>
+            <span class="dv">އަދަދު</span>
+          </th>
+          <th class="num" style="width: 140px;">
+            <span class="en">Unit Price (MVR)</span>
+            <span class="dv">ވަކި އަގު (ރުފިޔާ)</span>
+          </th>
+          <th class="num" style="width: 140px;">
+            <span class="en">Total (MVR)</span>
+            <span class="dv">ޖުމްލަ އަގު (ރުފިޔާ)</span>
+          </th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td><span class="en" contenteditable="true">[Description of goods or service]</span><span class="dv" contenteditable="true">[މުދާ ނުވަތަ ޚިދުމަތުގެ ތަފްޞީލު]</span></td>
-          <td class="num" contenteditable="true">[00]</td>
-          <td class="num" contenteditable="true">0.00</td>
-          <td class="num" contenteditable="true">0,000.00</td>
+      <tbody id="itemsBody">
+        <tr class="item-row">
+          <td class="col-action no-print">
+            <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
+          </td>
+          <td>
+            <span class="en" contenteditable="true">Web Development & Hosting Services</span>
+            <span class="dv" contenteditable="true">ވެބްސައިޓް ހެދުމާއި ހޯސްޓިންގ ޚިދުމަތް</span>
+          </td>
+          <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
+          <td class="num item-price" contenteditable="true" oninput="recalc()">3,500.00</td>
+          <td class="num item-total font-semibold">3,500.00</td>
+        </tr>
+        <tr class="item-row">
+          <td class="col-action no-print">
+            <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
+          </td>
+          <td>
+            <span class="en" contenteditable="true">Domain Name Registration (.mv - 1 Year)</span>
+            <span class="dv" contenteditable="true">ޑޮމެއިން ރަޖިސްޓްރޭޝަން (mv. - 1 އަހަރު)</span>
+          </td>
+          <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
+          <td class="num item-price" contenteditable="true" oninput="recalc()">500.00</td>
+          <td class="num item-total font-semibold">500.00</td>
         </tr>
       </tbody>
     </table>
 
+    <div class="table-actions no-print">
+      <button type="button" class="btn-add-item" onclick="addRow()">
+        <span>+</span>
+        <span class="en">Add Line Item</span>
+        <span class="dv">އައިޓަމެއް އިތުރުކުރޭ</span>
+      </button>
+    </div>
+
+    <!-- Totals Summary -->
     <div class="totals">
       <div class="totals-box">
         <div class="totals-row">
-          <span><span class="en">Subtotal</span><span class="dv">ޖުމްލަ</span></span>
-          <span class="val" contenteditable="true">MVR 0,000.00</span>
+          <span>
+            <span class="en">Subtotal</span>
+            <span class="dv">ޖުމްލަ އަގު</span>
+          </span>
+          <span class="val" id="subtotalVal">MVR 4,000.00</span>
         </div>
         <div class="totals-row">
-          <span><span class="en">GST (0%)</span><span class="dv">ޖީ.އެސް.ޓީ (%0)</span></span>
-          <span class="val" contenteditable="true">MVR 0,000.00</span>
+          <span>
+            <span class="en">GST (<span id="gstRateDisplay" class="gst-rate-edit" title="Click to change GST %" onclick="changeGSTRate()">8%</span>)</span>
+            <span class="dv">ޖީ.އެސް.ޓީ (<span id="gstRateDisplayDv" class="gst-rate-edit" title="Click to change GST %" onclick="changeGSTRate()">%8</span>)</span>
+          </span>
+          <span class="val" id="gstVal">MVR 320.00</span>
         </div>
         <div class="totals-row grand">
-          <span><span class="en">Total Amount Due</span><span class="dv">ދައްކަންޖެހޭ ޖުމްލަ ޢަދަދު</span></span>
-          <span class="val" contenteditable="true">MVR 0,000.00</span>
+          <span>
+            <span class="en">Total Amount Due</span>
+            <span class="dv">ދައްކަންޖެހޭ ޖުމްލަ</span>
+          </span>
+          <span class="val" id="grandTotalVal">MVR 4,320.00</span>
         </div>
       </div>
     </div>
 
+    <!-- Amount in Words -->
     <div class="amount-words">
-      <span class="en">Amount in Words</span><span class="dv">ފައިސާގެ ޢަދަދު ބަހުން</span>:
-      <span class="val"><span class="en" contenteditable="true">[Amount written out in words]</span><span class="dv" contenteditable="true">[ބަހުން ލިޔެފައިވާ ޢަދަދު]</span></span>
+      <span class="en">Amount in Words:</span>
+      <span class="dv">ފައިސާގެ ޢަދަދު ބަހުން:</span>
+      <span class="val">
+        <span class="en" id="wordsEn" contenteditable="true">Four Thousand Three Hundred Twenty Maldivian Rufiyaa Only</span>
+        <span class="dv" id="wordsDv" contenteditable="true">ހަތަރު ހާސް ތިންސަތޭކަ ވިހި ރުފިޔާ ހަމައެކަނި</span>
+      </span>
     </div>
 
+    <!-- Payment Account Information -->
     <div class="payment">
-      <div class="payment-label"><span class="en">Bank Account Details for Payment</span><span class="dv">ފައިސާ ޖަމާކުރަންވީ އެކައުންޓް މަޢުލޫމާތު</span></div>
-      <div class="payment-row"><span class="k"><span class="en">Bank Name</span><span class="dv">ބޭންކުގެ ނަން</span></span><span class="v"><span class="en" contenteditable="true">[Bank Name]</span><span class="dv" contenteditable="true">[ބޭންކުގެ ނަން]</span></span></div>
-      <div class="payment-row"><span class="k"><span class="en">Account Name</span><span class="dv">އެކައުންޓްގެ ނަން</span></span><span class="v"><span class="en" contenteditable="true">[Account Holder Name]</span><span class="dv" contenteditable="true">[އެކައުންޓް ހުޅުވާފައިވާ ފަރާތުގެ ނަން]</span></span></div>
-      <div class="payment-row"><span class="k"><span class="en">Account No.</span><span class="dv">އެކައުންޓް ނަންބަރު</span></span><span class="v" contenteditable="true"><span class="en">[0000000000000] (MVR)</span><span class="dv">[0000000000000] (ދިވެހި ރުފިޔާ)</span></span></div>
+      <div class="payment-label">
+        <span class="en">Bank Account Details for Payment</span>
+        <span class="dv">ފައިސާ ޖަމާކުރަންވީ އެކައުންޓް މަޢުލޫމާތު</span>
+      </div>
+      <div class="payment-row">
+        <span class="k"><span class="en">Bank Name</span><span class="dv">ބޭންކުގެ ނަން</span></span>
+        <span class="v">
+          <span class="en" contenteditable="true">Bank of Maldives (BML)</span>
+          <span class="dv" contenteditable="true">ބޭންކް އޮފް މޯލްޑިވްސް (ބީ.އެމް.އެލް)</span>
+        </span>
+      </div>
+      <div class="payment-row">
+        <span class="k"><span class="en">Account Name</span><span class="dv">އެކައުންޓްގެ ނަން</span></span>
+        <span class="v">
+          <span class="en" contenteditable="true">Your Business Name Pvt Ltd</span>
+          <span class="dv" contenteditable="true">ކުންފުނީގެ އެކައުންޓް ނަން</span>
+        </span>
+      </div>
+      <div class="payment-row">
+        <span class="k"><span class="en">Account No. (MVR)</span><span class="dv">އެކައުންޓް ނަންބަރު (ރުފިޔާ)</span></span>
+        <span class="v" contenteditable="true">7704 000000 001</span>
+      </div>
     </div>
 
+    <!-- Invoice Footer / Note -->
     <div class="note">
-      <span class="en" contenteditable="true">Note: As this is an official invoice generated by computer, a signature is not required. If you need to clarify any information regarding this invoice, please contact the phone number above.</span>
+      <span class="en" contenteditable="true">Note: This is a computer-generated invoice and does not require a physical signature. Payments are requested to be made via bank transfer to the account stated above within 14 days of issue.</span>
       <span class="dv" contenteditable="true">ނޯޓު: މިއީ ކޮމްޕިއުޓަރުން ތައްޔާރުކުރެވިފައިވާ ރަސްމީ އިންވޮއިސްއަކަށް ވާތީ ސޮއިކުރަން ނުޖެހޭނެއެވެ. މި އިންވޮއިސްއާ ގުޅޭގޮތުން އެއްވެސް މަޢުލޫމާތެއް ސާފުކުރައްވަން ބޭނުންފުޅުނަމަ، މަތީގައިވާ ފޯނު ނަންބަރަށް ގުޅުއްވުން އެދެމެވެ.</span>
     </div>
-  </div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script>
-    function setLang(lang){
-      const body = document.getElementById('bodyRoot');
-      body.classList.remove('lang-en', 'lang-dv');
-      body.classList.add('lang-' + lang);
-      document.getElementById('htmlRoot').setAttribute('lang', lang);
+    let currentGstRate = 8.0; // Default Maldivian GST rate
+
+    /* --- Language & Direction Switching --- */
+    function setLang(lang) {
+      const htmlRoot = document.getElementById('htmlRoot');
+      const bodyRoot = document.getElementById('bodyRoot');
+
+      bodyRoot.classList.remove('lang-en', 'lang-dv');
+      bodyRoot.classList.add('lang-' + lang);
+
+      htmlRoot.setAttribute('lang', lang);
+      htmlRoot.setAttribute('dir', lang === 'dv' ? 'rtl' : 'ltr');
+
       document.querySelectorAll('#langSwitch button').forEach(b => {
         b.classList.toggle('active', b.dataset.lang === lang);
       });
     }
 
-    function pdfFilename(){
-      const billNo = document.querySelectorAll('.meta .val')[0]?.innerText.trim().replace(/\//g,'-') || 'invoice';
+    /* --- Number & String Parsing Helpers --- */
+    function parseNum(val) {
+      if (!val) return 0;
+      const clean = val.replace(/[^0-9.-]+/g, '');
+      const parsed = parseFloat(clean);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+
+    function formatMVR(num) {
+      return num.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    /* --- Real-Time Calculations --- */
+    function recalc() {
+      const rows = document.querySelectorAll('#itemsBody .item-row');
+      let subtotal = 0;
+
+      rows.forEach(row => {
+        const qtyEl = row.querySelector('.item-qty');
+        const priceEl = row.querySelector('.item-price');
+        const totalEl = row.querySelector('.item-total');
+
+        const qty = parseNum(qtyEl.innerText);
+        const price = parseNum(priceEl.innerText);
+        const lineTotal = qty * price;
+
+        totalEl.innerText = formatMVR(lineTotal);
+        subtotal += lineTotal;
+      });
+
+      const gstAmount = subtotal * (currentGstRate / 100);
+      const grandTotal = subtotal + gstAmount;
+
+      document.getElementById('subtotalVal').innerText = `MVR ${formatMVR(subtotal)}`;
+      document.getElementById('gstVal').innerText = `MVR ${formatMVR(gstAmount)}`;
+      document.getElementById('grandTotalVal').innerText = `MVR ${formatMVR(grandTotal)}`;
+
+      // Update English words automatically
+      const wordsEn = numberToWords(Math.round(grandTotal));
+      if (wordsEn) {
+        document.getElementById('wordsEn').innerText = `${wordsEn} Maldivian Rufiyaa Only`;
+      }
+    }
+
+    /* --- Add & Delete Rows --- */
+    function addRow() {
+      const tbody = document.getElementById('itemsBody');
+      const tr = document.createElement('tr');
+      tr.className = 'item-row';
+      tr.innerHTML = `
+        <td class="col-action no-print">
+          <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
+        </td>
+        <td>
+          <span class="en" contenteditable="true">New Item Description</span>
+          <span class="dv" contenteditable="true">އައު އައިޓަމުގެ ތަފްޞީލު</span>
+        </td>
+        <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
+        <td class="num item-price" contenteditable="true" oninput="recalc()">0.00</td>
+        <td class="num item-total font-semibold">0.00</td>
+      `;
+      tbody.appendChild(tr);
+      recalc();
+    }
+
+    function deleteRow(btn) {
+      const tbody = document.getElementById('itemsBody');
+      const rows = tbody.querySelectorAll('.item-row');
+      if (rows.length <= 1) {
+        alert("An invoice must have at least one line item.");
+        return;
+      }
+      btn.closest('tr').remove();
+      recalc();
+    }
+
+    /* --- Quick GST Rate Changer --- */
+    function changeGSTRate() {
+      const promptText = prompt("Enter GST Rate percentage (e.g. 0, 8, 12, 16):", currentGstRate);
+      if (promptText !== null) {
+        const parsed = parseFloat(promptText);
+        if (!isNaN(parsed) && parsed >= 0) {
+          currentGstRate = parsed;
+          document.getElementById('gstRateDisplay').innerText = `${parsed}%`;
+          document.getElementById('gstRateDisplayDv').innerText = `%${parsed}`;
+          recalc();
+        }
+      }
+    }
+
+    /* --- Simple English Number to Words Converter --- */
+    function numberToWords(num) {
+      if (num === 0) return 'Zero';
+      const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
+        'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+      const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+      function inWords(n) {
+        if (n < 20) return a[n];
+        if (n < 100) return b[Math.floor(n / 10)] + (n % 10 !== 0 ? ' ' + a[n % 10] : '');
+        if (n < 1000) return a[Math.floor(n / 100)] + ' Hundred' + (n % 100 !== 0 ? ' ' + inWords(n % 100) : '');
+        if (n < 1000000) return inWords(Math.floor(n / 1000)) + ' Thousand' + (n % 1000 !== 0 ? ' ' + inWords(n % 1000) : '');
+        if (n < 1000000000) return inWords(Math.floor(n / 1000000)) + ' Million' + (n % 1000000 !== 0 ? ' ' + inWords(n % 1000000) : '');
+        return '';
+      }
+      return inWords(num);
+    }
+
+    /* --- PDF Generation & Export --- */
+    function pdfFilename() {
+      const billNo = document.getElementById('invoiceNo')?.innerText.trim().replace(/[\/\\?%*:|"<>]/g, '-') || 'INV';
       return `Invoice_${billNo}.pdf`;
     }
 
-    function getPdfOptions(){
+    function getPdfOptions() {
       return {
-        margin: 0,
+        margin: [10, 10, 10, 10],
         filename: pdfFilename(),
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          logging: false
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
     }
 
-    function isIOS(){
+    function isIOS() {
       return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
 
-    function resetDownloadBtn(){
+    function resetDownloadBtn() {
       const btn = document.getElementById('downloadBtn');
       btn.disabled = false;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg> Download PDF';
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg> <span class="en">Download PDF</span><span class="dv">ޕީޑީއެފް ޑައުންލޯޑް</span>`;
     }
 
-    function downloadPDF(){
+    function downloadPDF() {
       const btn = document.getElementById('downloadBtn');
       btn.disabled = true;
-      btn.textContent = 'Generating…';
+      btn.innerText = 'Generating…';
       const el = document.getElementById('invoiceSheet');
       const filename = pdfFilename();
 
+      document.body.classList.add('rendering-pdf');
+
       document.fonts.ready.then(() => {
-      if (isIOS()){
-        // iOS Safari does not reliably trigger a real file download for blob links.
-        // Instead, try the native share sheet (lets the user "Save to Files"),
-        // and fall back to opening the PDF in a new tab where it can be saved
-        // via the browser's own Share/Save icon.
-        html2pdf().set(getPdfOptions()).from(el).outputPdf('blob').then((blob) => {
-          const file = new File([blob], filename, { type: 'application/pdf' });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            navigator.share({ files: [file], title: filename }).catch(() => {}).finally(resetDownloadBtn);
-          } else {
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
-            setTimeout(() => URL.revokeObjectURL(url), 60000);
+        if (isIOS()) {
+          html2pdf().set(getPdfOptions()).from(el).outputPdf('blob').then(blob => {
+            document.body.classList.remove('rendering-pdf');
+            const file = new File([blob], filename, { type: 'application/pdf' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              navigator.share({ files: [file], title: filename }).catch(() => {}).finally(resetDownloadBtn);
+            } else {
+              const url = URL.createObjectURL(blob);
+              window.open(url, '_blank');
+              setTimeout(() => URL.revokeObjectURL(url), 60000);
+              resetDownloadBtn();
+            }
+          }).catch(() => {
+            document.body.classList.remove('rendering-pdf');
             resetDownloadBtn();
-          }
-        });
-      } else {
-        html2pdf().set(getPdfOptions()).from(el).save().then(resetDownloadBtn);
-      }
-      });
-    }
-
-    function shareWhatsApp(){
-      const btn = document.getElementById('waBtn');
-      btn.disabled = true;
-      btn.textContent = 'Preparing…';
-      const el = document.getElementById('invoiceSheet');
-
-      document.fonts.ready.then(() => {
-      html2pdf().set(getPdfOptions()).from(el).outputPdf('blob').then((blob) => {
-        const filename = pdfFilename();
-        const file = new File([blob], filename, { type: 'application/pdf' });
-
-        // Try native share sheet with the file attached (works on most mobile browsers)
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          navigator.share({
-            files: [file],
-            title: filename,
-            text: 'Invoice'
-          }).catch(() => {}).finally(resetBtn);
+          });
         } else {
-          // Fallback: open the PDF in a new tab (iOS Safari can then Save to
-          // Files via the Share icon), then open WhatsApp with a prefilled message
-          const url = URL.createObjectURL(blob);
-          if (isIOS()){
-            window.open(url, '_blank');
-          } else {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          }
-          setTimeout(() => URL.revokeObjectURL(url), 60000);
-
-          const msg = encodeURIComponent('Invoice attached: ' + filename + ' (please attach the saved PDF file in the chat)');
-          window.open('https://wa.me/?text=' + msg, '_blank');
-          resetBtn();
+          html2pdf().set(getPdfOptions()).from(el).save().then(() => {
+            document.body.classList.remove('rendering-pdf');
+            resetDownloadBtn();
+          }).catch(() => {
+            document.body.classList.remove('rendering-pdf');
+            resetDownloadBtn();
+          });
         }
       });
+    }
+
+    /* --- WhatsApp Share --- */
+    function shareWhatsApp() {
+      const btn = document.getElementById('waBtn');
+      btn.disabled = true;
+      btn.innerText = 'Preparing…';
+      const el = document.getElementById('invoiceSheet');
+      const filename = pdfFilename();
+
+      document.body.classList.add('rendering-pdf');
+
+      document.fonts.ready.then(() => {
+        html2pdf().set(getPdfOptions()).from(el).outputPdf('blob').then(blob => {
+          document.body.classList.remove('rendering-pdf');
+          const file = new File([blob], filename, { type: 'application/pdf' });
+
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            navigator.share({
+              files: [file],
+              title: filename,
+              text: 'Invoice: ' + filename
+            }).catch(() => {}).finally(resetWaBtn);
+          } else {
+            const url = URL.createObjectURL(blob);
+            if (isIOS()) {
+              window.open(url, '_blank');
+            } else {
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = filename;
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            }
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+            const msg = encodeURIComponent('Invoice attached: ' + filename + ' (Please attach the downloaded PDF file)');
+            window.open('https://wa.me/?text=' + msg, '_blank');
+            resetWaBtn();
+          }
+        }).catch(() => {
+          document.body.classList.remove('rendering-pdf');
+          resetWaBtn();
+        });
       });
 
-      function resetBtn(){
+      function resetWaBtn() {
         btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.54 2 12.04 2zm0 18.02h-.01a8.27 8.27 0 01-4.22-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.24 8.24 0 01-1.27-4.4c0-4.55 3.71-8.26 8.27-8.26 2.21 0 4.28.86 5.84 2.42a8.2 8.2 0 012.42 5.84c0 4.56-3.71 8.27-8.23 8.27zm4.52-6.2c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.16.25-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01s-.43.06-.66.31c-.23.25-.86.85-.86 2.06 0 1.22.89 2.4 1.01 2.56.12.16 1.75 2.67 4.24 3.74.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg> Share on WhatsApp';
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.54 2 12.04 2zm0 18.02h-.01a8.27 8.27 0 01-4.22-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.24 8.24 0 01-1.27-4.4c0-4.55 3.71-8.26 8.27-8.26 2.21 0 4.28.86 5.84 2.42a8.2 8.2 0 012.42 5.84c0 4.56-3.71 8.27-8.23 8.27zm4.52-6.2c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.16.25-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01s-.43.06-.66.31c-.23.25-.86.85-.86 2.06 0 1.22.89 2.4 1.01 2.56.12.16 1.75 2.67 4.24 3.74.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg> <span class="en">WhatsApp</span><span class="dv">ވަޓްސްއަޕް</span>`;
       }
     }
+
+    // Run initial calculation to sync values
+    recalc();
   </script>
 </body>
 </html>
