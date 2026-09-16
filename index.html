@@ -887,7 +887,8 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
     let currentGstRate = 8.0; // Default Maldivian GST rate
 
@@ -1130,26 +1131,49 @@
       return inWords(num);
     }
 
-    /* --- PDF Generation & Export --- */
+    /* --- PDF Generation & Export (forced single A4 page) --- */
     function pdfFilename() {
       const billNo = document.getElementById('invoiceNo')?.innerText.trim().replace(/[\/\\?%*:|"<>]/g, '-') || 'INV';
       return `Invoice_${billNo}.pdf`;
     }
 
-    function getPdfOptions() {
-      return {
-        margin: [14, 14, 14, 14],
-        filename: pdfFilename(),
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          logging: false
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
+    const PDF_MARGIN_MM = 14;
+
+    // Renders the invoice sheet onto exactly one A4 page, shrinking it to fit if needed.
+    async function buildSinglePagePdf(el) {
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const maxWidth = pageWidth - PDF_MARGIN_MM * 2;
+      const maxHeight = pageHeight - PDF_MARGIN_MM * 2;
+
+      const canvasRatio = canvas.width / canvas.height;
+      let renderWidth = maxWidth;
+      let renderHeight = renderWidth / canvasRatio;
+
+      // If it's still too tall for one page, scale down by height instead so it always fits on a single A4 sheet.
+      if (renderHeight > maxHeight) {
+        renderHeight = maxHeight;
+        renderWidth = renderHeight * canvasRatio;
+      }
+
+      const x = (pageWidth - renderWidth) / 2;
+      const y = PDF_MARGIN_MM;
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      pdf.addImage(imgData, 'JPEG', x, y, renderWidth, renderHeight, undefined, 'FAST');
+
+      return pdf;
     }
 
     function isIOS() {
@@ -1163,7 +1187,7 @@
       btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg> <span class="en">Download PDF</span><span class="dv">ޕީޑީއެފް ޑައުންލޯޑް</span>`;
     }
 
-    function downloadPDF() {
+    async function downloadPDF() {
       const btn = document.getElementById('downloadBtn');
       btn.disabled = true;
       btn.innerText = 'Generating…';
@@ -1172,37 +1196,34 @@
 
       document.body.classList.add('rendering-pdf');
 
-      document.fonts.ready.then(() => {
+      try {
+        await document.fonts.ready;
+        const pdf = await buildSinglePagePdf(el);
+        document.body.classList.remove('rendering-pdf');
+
         if (isIOS()) {
-          html2pdf().set(getPdfOptions()).from(el).outputPdf('blob').then(blob => {
-            document.body.classList.remove('rendering-pdf');
-            const file = new File([blob], filename, { type: 'application/pdf' });
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              navigator.share({ files: [file], title: filename }).catch(() => {}).finally(resetDownloadBtn);
-            } else {
-              const url = URL.createObjectURL(blob);
-              window.open(url, '_blank');
-              setTimeout(() => URL.revokeObjectURL(url), 60000);
-              resetDownloadBtn();
-            }
-          }).catch(() => {
-            document.body.classList.remove('rendering-pdf');
-            resetDownloadBtn();
-          });
+          const blob = pdf.output('blob');
+          const file = new File([blob], filename, { type: 'application/pdf' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: filename }).catch(() => {});
+          } else {
+            const url = URL.createObjectURL(blob);
+            window.open(url, '_blank');
+            setTimeout(() => URL.revokeObjectURL(url), 60000);
+          }
         } else {
-          html2pdf().set(getPdfOptions()).from(el).save().then(() => {
-            document.body.classList.remove('rendering-pdf');
-            resetDownloadBtn();
-          }).catch(() => {
-            document.body.classList.remove('rendering-pdf');
-            resetDownloadBtn();
-          });
+          pdf.save(filename);
         }
-      });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        document.body.classList.remove('rendering-pdf');
+        resetDownloadBtn();
+      }
     }
 
     /* --- WhatsApp Share --- */
-    function shareWhatsApp() {
+    async function shareWhatsApp() {
       const btn = document.getElementById('waBtn');
       btn.disabled = true;
       btn.innerText = 'Preparing…';
@@ -1211,44 +1232,47 @@
 
       document.body.classList.add('rendering-pdf');
 
-      document.fonts.ready.then(() => {
-        html2pdf().set(getPdfOptions()).from(el).outputPdf('blob').then(blob => {
-          document.body.classList.remove('rendering-pdf');
-          const file = new File([blob], filename, { type: 'application/pdf' });
-
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            navigator.share({
-              files: [file],
-              title: filename,
-              text: 'Invoice: ' + filename
-            }).catch(() => {}).finally(resetWaBtn);
-          } else {
-            const url = URL.createObjectURL(blob);
-            if (isIOS()) {
-              window.open(url, '_blank');
-            } else {
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = filename;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-            }
-            setTimeout(() => URL.revokeObjectURL(url), 60000);
-
-            const msg = encodeURIComponent('Invoice attached: ' + filename + ' (Please attach the downloaded PDF file)');
-            window.open('https://wa.me/?text=' + msg, '_blank');
-            resetWaBtn();
-          }
-        }).catch(() => {
-          document.body.classList.remove('rendering-pdf');
-          resetWaBtn();
-        });
-      });
-
       function resetWaBtn() {
         btn.disabled = false;
         btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.54 2 12.04 2zm0 18.02h-.01a8.27 8.27 0 01-4.22-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.24 8.24 0 01-1.27-4.4c0-4.55 3.71-8.26 8.27-8.26 2.21 0 4.28.86 5.84 2.42a8.2 8.2 0 012.42 5.84c0 4.56-3.71 8.27-8.23 8.27zm4.52-6.2c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.16.25-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01s-.43.06-.66.31c-.23.25-.86.85-.86 2.06 0 1.22.89 2.4 1.01 2.56.12.16 1.75 2.67 4.24 3.74.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg> <span class="en">WhatsApp</span><span class="dv">ވަޓްސްއަޕް</span>`;
+      }
+
+      try {
+        await document.fonts.ready;
+        const pdf = await buildSinglePagePdf(el);
+        document.body.classList.remove('rendering-pdf');
+
+        const blob = pdf.output('blob');
+        const file = new File([blob], filename, { type: 'application/pdf' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: filename,
+            text: 'Invoice: ' + filename
+          }).catch(() => {});
+        } else {
+          const url = URL.createObjectURL(blob);
+          if (isIOS()) {
+            window.open(url, '_blank');
+          } else {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          }
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+
+          const msg = encodeURIComponent('Invoice attached: ' + filename + ' (Please attach the downloaded PDF file)');
+          window.open('https://wa.me/?text=' + msg, '_blank');
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        document.body.classList.remove('rendering-pdf');
+        resetWaBtn();
       }
     }
 
