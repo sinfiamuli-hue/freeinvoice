@@ -2,8 +2,8 @@
 <html lang="en" id="htmlRoot" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Invoice - Bilingual (English / ދިވެހި)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Invoice - Bilingual (English / ދިވެހި) - Official A4 Document</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Google Fonts fallback for Thaana / Dhivehi -->
@@ -21,27 +21,40 @@
   :root {
     --ink: #111827;
     --muted: #4b5563;
+    --subtle: #6b7280;
     --line: #e5e7eb;
+    --line-dark: #111827;
     --bg: #ffffff;
     --surface: #f9fafb;
-    --accent: #2563eb;
-    --danger: #ef4444;
-    --font-en: 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    --surface-hover: #f3f4f6;
+    --accent: #1d4ed8;
+    --accent-light: #eff6ff;
+    --accent-border: #bfdbfe;
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+    --success: #16a34a;
+    --font-en: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     --font-dv: 'Faruma', 'Noto Sans Thaana', 'MV Boli', sans-serif;
+    /* Strict A4 Dimensions */
+    --a4-width: 210mm;
+    --a4-height: 297mm;
   }
 
-  * { box-sizing: border-box; }
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-  body {
+  html, body {
     margin: 0;
-    background: #f3f4f6;
+    padding: 0;
+    background: #f1f5f9;
     font-family: var(--font-en);
     color: var(--ink);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 32px 16px;
-    min-height: 100vh;
   }
 
   /* --- Language & Direction Switching --- */
@@ -59,18 +72,33 @@
   body.lang-dv .en { display: none !important; }
   body.lang-dv .dv { display: inline !important; }
 
-  /* RTL Specific Alignments */
+  /* Numerals must always flow Left-to-Right in both languages */
+  .num,
+  .num-ltr,
+  .val,
+  .item-qty,
+  .item-price,
+  .item-total,
+  .meta span.val,
+  .totals-row .val,
+  #gstRateDisplay,
+  #gstRateDisplayDv {
+    direction: ltr !important;
+    unicode-bidi: isolate !important;
+  }
+
+  /* RTL Specific Adjustments */
   html[dir="rtl"] body {
     direction: rtl;
   }
-  html[dir="rtl"] .toolbar {
+  html[dir="rtl"] .top-header-inner {
+    flex-direction: row-reverse;
+  }
+  html[dir="rtl"] .top {
     flex-direction: row-reverse;
   }
   html[dir="rtl"] .invoice-label {
     text-align: left;
-  }
-  html[dir="rtl"] .top {
-    flex-direction: row-reverse;
   }
   html[dir="rtl"] th:not(.num),
   html[dir="rtl"] td:not(.num) {
@@ -78,12 +106,12 @@
   }
   html[dir="rtl"] th.num,
   html[dir="rtl"] td.num {
-    text-align: left;
+    text-align: right !important;
   }
   html[dir="rtl"] .totals {
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
-  html[dir="rtl"] .totals-discount-action {
+  html[dir="rtl"] .totals-row .val {
     text-align: left;
   }
   html[dir="rtl"] .payment {
@@ -94,18 +122,62 @@
     flex-direction: row;
   }
 
-  /* --- Top Toolbar --- */
-  .toolbar {
+  /* --- Fixed / Sticky App Header Bar --- */
+  .top-header {
     width: 100%;
-    max-width: 800px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    justify-content: flex-end;
-    margin-bottom: 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
-  .toolbar .spacer { flex: 1; }
 
+  .top-header-inner {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  /* Document Meta Badge */
+  .doc-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+  }
+  .doc-badge svg {
+    width: 14px;
+    height: 14px;
+    color: var(--accent);
+  }
+
+  /* Language Switcher */
   .lang-switch {
     display: inline-flex;
     border: 1px solid var(--ink);
@@ -114,15 +186,16 @@
     background: #fff;
   }
   .lang-switch button {
-    font-family: var(--font-en);
-    font-size: 13px;
+    font-family: inherit;
+    font-size: 12.5px;
     font-weight: 600;
-    padding: 8px 16px;
+    padding: 7px 14px;
     border: none;
     background: #fff;
     color: var(--ink);
     cursor: pointer;
     transition: background 0.15s, color 0.15s;
+    line-height: 1.2;
   }
   .lang-switch button.active {
     background: var(--ink);
@@ -132,11 +205,43 @@
     border-right: 1px solid var(--ink);
   }
 
+  /* Mobile Zoom / View Mode Switcher */
+  .view-switch {
+    display: inline-flex;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f8fafc;
+  }
+  .view-switch button {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 7px 12px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s;
+  }
+  .view-switch button.active {
+    background: #e2e8f0;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .view-switch button:not(:last-child) {
+    border-right: 1px solid #cbd5e1;
+  }
+
+  /* Action Buttons */
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 9px 18px;
+    justify-content: center;
+    gap: 7px;
+    padding: 8px 15px;
     font-size: 13px;
     font-weight: 600;
     border-radius: 6px;
@@ -145,40 +250,128 @@
     color: #fff;
     cursor: pointer;
     transition: all 0.15s ease;
+    text-decoration: none;
+    white-space: nowrap;
   }
-  .btn:hover { opacity: 0.88; transform: translateY(-1px); }
-  .btn:active { transform: translateY(0); }
-  .btn.secondary {
-    background: #25D366;
-    border-color: #25D366;
+  .btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  .btn:active {
+    transform: translateY(0);
+  }
+  .btn.btn-outline {
+    background: #fff;
+    color: var(--ink);
+    border-color: #cbd5e1;
+  }
+  .btn.btn-outline:hover {
+    background: #f8fafc;
+    border-color: var(--ink);
+  }
+  .btn.btn-success {
+    background: #059669;
+    border-color: #059669;
     color: #fff;
   }
+  .btn.btn-success:hover {
+    background: #047857;
+  }
+  .btn.btn-accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn.btn-accent:hover {
+    background: #1e40af;
+  }
   .btn:disabled {
-    opacity: 0.5;
+    opacity: 0.55;
     cursor: not-allowed;
     transform: none;
   }
-  .btn svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .btn svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
 
-  /* --- Logo Upload --- */
+  /* --- Document Viewport & Scaling Container --- */
+  .document-viewport {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 12px 64px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+  }
+
+  .sheet-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .sheet-scaler {
+    transform-origin: top center;
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* --- A4 Professional Sheet --- */
+  .sheet {
+    background: var(--bg);
+    /* Strict A4 dimensions */
+    width: var(--a4-width);
+    min-height: var(--a4-height);
+    max-height: var(--a4-height);
+    /* Balanced padding so content fits inside single A4 portrait sheet */
+    padding: 12mm 14mm 10mm 14mm;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.06), 0 10px 25px -3px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03);
+    border-radius: 3px;
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  /* --- Header / Top Brand Section --- */
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2px solid var(--line-dark);
+    padding-bottom: 14px;
+    margin-bottom: 16px;
+  }
+
+  .brand-col {
+    max-width: 58%;
+  }
+
   .logo-wrap {
-    margin-bottom: 14px;
+    margin-bottom: 8px;
   }
   .logo-box {
-    width: 160px;
-    height: 80px;
-    border: 1px dashed #9ca3af;
-    border-radius: 6px;
+    width: 140px;
+    height: 60px;
+    border: 1px dashed #94a3b8;
+    border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     color: var(--muted);
-    font-size: 12px;
+    font-size: 11px;
     text-align: center;
     overflow: hidden;
     position: relative;
-    background: #fff;
+    background: #ffffff;
+    transition: border-color 0.15s;
   }
   .logo-box:hover {
     border-color: var(--ink);
@@ -186,8 +379,9 @@
   }
   .logo-box.has-logo {
     cursor: default;
-    border-style: solid;
-    border-color: var(--line);
+    border: none;
+    background: transparent;
+    padding: 0;
   }
   .logo-box img {
     max-width: 100%;
@@ -197,9 +391,9 @@
   }
   .logo-remove {
     position: absolute;
-    top: 3px;
-    right: 3px;
-    background: rgba(255,255,255,0.92);
+    top: 2px;
+    right: 2px;
+    background: rgba(255, 255, 255, 0.95);
     border: 1px solid var(--line);
     border-radius: 50%;
     width: 18px;
@@ -212,6 +406,7 @@
     justify-content: center;
     color: var(--muted);
     padding: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   }
   .logo-box.has-logo .logo-remove { display: flex; }
   .logo-box.has-logo:hover .logo-remove { color: var(--danger); border-color: var(--danger); }
@@ -220,88 +415,81 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0 10px;
-    line-height: 1.4;
+    padding: 0 8px;
+    line-height: 1.3;
   }
 
-  /* --- Main Invoice Sheet --- */
-  .sheet {
-    background: var(--bg);
-    width: 100%;
-    max-width: 800px;
-    padding: 56px 56px 48px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-    border-radius: 4px;
-    position: relative;
-  }
-
-  .top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 2px solid var(--ink);
-    padding-bottom: 24px;
-    margin-bottom: 28px;
-  }
   .brand {
-    font-size: 26px;
-    letter-spacing: 1px;
+    font-size: 20px;
+    letter-spacing: 0.5px;
     font-weight: 700;
-    margin: 0 0 8px 0;
+    margin: 0 0 4px 0;
+    color: var(--ink);
   }
-  .brand .dv { letter-spacing: 0; font-size: 24px; }
+  .brand .dv { letter-spacing: 0; font-size: 19px; }
   .brand-details {
-    font-size: 13px;
+    font-size: 11.5px;
     color: var(--muted);
-    line-height: 1.6;
+    line-height: 1.5;
   }
-  .brand-details > div { margin-bottom: 2px; }
+  .brand-details > div { margin-bottom: 1px; }
 
   .invoice-label {
     text-align: right;
   }
   .invoice-label h1 {
-    font-size: 22px;
-    margin: 0 0 8px 0;
+    font-size: 20px;
+    margin: 0 0 6px 0;
     letter-spacing: 1.5px;
-    font-weight: 700;
+    font-weight: 800;
+    color: var(--ink);
   }
   .meta {
-    font-size: 13px;
+    font-size: 11.5px;
     color: var(--muted);
-    line-height: 1.6;
+    line-height: 1.55;
+  }
+  .meta > div {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  html[dir="rtl"] .meta > div {
+    justify-content: flex-start;
   }
   .meta span.val {
     color: var(--ink);
     font-weight: 600;
   }
 
+  /* --- Address Section --- */
   .addresses {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 32px;
+    margin-bottom: 14px;
   }
   .addr-block {
-    max-width: 50%;
+    max-width: 60%;
   }
   .addr-label {
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    color: var(--subtle);
     text-transform: uppercase;
-    margin-bottom: 8px;
-    font-weight: 600;
+    margin-bottom: 4px;
+    font-weight: 700;
   }
   body.lang-dv .addr-label { text-transform: none; letter-spacing: 0; }
   .addr-name {
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 4px;
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    color: var(--ink);
   }
   .addr-text {
-    font-size: 13px;
+    font-size: 11.5px;
     color: var(--muted);
-    line-height: 1.6;
+    line-height: 1.5;
   }
   .addr-text .en { display: block; }
   .addr-text .dv { display: none; }
@@ -309,22 +497,25 @@
   body.lang-dv .addr-text .en { display: none; }
 
   /* --- Items Table --- */
+  .table-wrap {
+    width: 100%;
+    margin-bottom: 8px;
+  }
   table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 12px;
   }
   thead tr {
-    border-bottom: 2px solid var(--ink);
+    border-bottom: 1.5px solid var(--line-dark);
   }
   th {
     text-align: left;
-    font-size: 11px;
-    letter-spacing: 1px;
+    font-size: 10px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
     color: var(--muted);
-    padding: 10px 8px 10px 0;
-    font-weight: 600;
+    padding: 7px 6px 7px 0;
+    font-weight: 700;
   }
   body.lang-dv th { text-transform: none; letter-spacing: 0; }
   th.num, td.num {
@@ -332,13 +523,13 @@
     white-space: nowrap;
   }
   th.col-action, td.col-action {
-    width: 32px;
+    width: 28px;
     text-align: center;
-    padding: 0 4px;
+    padding: 0 2px;
   }
   td {
-    padding: 14px 8px 14px 0;
-    font-size: 14px;
+    padding: 8px 6px 8px 0;
+    font-size: 12px;
     border-bottom: 1px solid var(--line);
     vertical-align: middle;
   }
@@ -346,33 +537,36 @@
   .btn-del-row {
     background: transparent;
     border: none;
-    color: #9ca3af;
+    color: #94a3b8;
     cursor: pointer;
-    padding: 4px 6px;
+    padding: 3px 5px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 1;
     transition: all 0.15s;
   }
   .btn-del-row:hover {
     color: var(--danger);
-    background: #fee2e2;
+    background: var(--danger-light);
   }
 
   .table-actions {
-    margin-bottom: 28px;
+    margin: 6px 0 14px 0;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
   }
   .btn-add-item {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     background: transparent;
-    border: 1px dashed #9ca3af;
+    border: 1px dashed #94a3b8;
     color: var(--ink);
-    padding: 8px 14px;
-    font-size: 13px;
+    padding: 5px 10px;
+    font-size: 11.5px;
     font-weight: 500;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     transition: all 0.15s;
   }
@@ -381,40 +575,48 @@
     background: var(--surface);
   }
 
-  /* --- Totals Box --- */
-  .totals {
+  /* --- Totals & Words Section --- */
+  .totals-container {
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 32px;
+    margin-bottom: 14px;
   }
   .totals-box {
-    width: 290px;
+    width: 270px;
   }
   .totals-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 14px;
-    padding: 8px 0;
+    font-size: 12px;
+    padding: 4px 0;
   }
   .totals-row.grand {
-    border-top: 2px solid var(--ink);
-    margin-top: 6px;
-    padding-top: 14px;
-    font-size: 16px;
+    border-top: 2px solid var(--line-dark);
+    margin-top: 4px;
+    padding-top: 8px;
+    font-size: 14px;
     font-weight: 700;
   }
   .gst-rate-edit {
     cursor: pointer;
     text-decoration: underline dotted;
-    text-underline-offset: 3px;
+    text-underline-offset: 2px;
   }
 
   .amount-words {
-    font-size: 13px;
+    font-size: 11px;
     color: var(--muted);
-    margin: -16px 0 28px 0;
-    line-height: 1.6;
+    margin-bottom: 14px;
+    line-height: 1.5;
+    background: #fafafa;
+    border-radius: 4px;
+    padding: 6px 10px;
+    border-left: 3px solid #cbd5e1;
+  }
+  html[dir="rtl"] .amount-words {
+    border-left: none;
+    border-right: 3px solid #cbd5e1;
   }
   .amount-words span.val {
     color: var(--ink);
@@ -424,28 +626,28 @@
   /* --- Payment Details --- */
   .payment {
     background: var(--surface);
-    padding: 18px 24px;
-    margin-bottom: 28px;
-    border-left: 3px solid var(--ink);
+    padding: 10px 16px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--line-dark);
     border-radius: 4px;
   }
   .payment-label {
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    color: var(--subtle);
     text-transform: uppercase;
-    margin-bottom: 10px;
-    font-weight: 600;
+    margin-bottom: 6px;
+    font-weight: 700;
   }
   body.lang-dv .payment-label { text-transform: none; letter-spacing: 0; }
   .payment-row {
     display: flex;
-    font-size: 13px;
-    margin-bottom: 6px;
+    font-size: 11.5px;
+    margin-bottom: 3px;
   }
   .payment-row:last-child { margin-bottom: 0; }
   .payment-row .k {
-    width: 170px;
+    width: 150px;
     color: var(--muted);
     flex-shrink: 0;
   }
@@ -454,93 +656,39 @@
   }
 
   /* --- Footer Note --- */
+  .bottom-section {
+    margin-top: auto;
+  }
   .note {
-    font-size: 12px;
+    font-size: 10.5px;
     color: var(--muted);
-    line-height: 1.7;
+    line-height: 1.5;
     border-top: 1px solid var(--line);
-    padding-top: 18px;
+    padding-top: 10px;
   }
   .note .dv { display: none; }
   body.lang-dv .note .dv { display: block; }
   body.lang-dv .note .en { display: none; }
 
-  /* Editable Highlight */
-  [contenteditable="true"]:hover {
-    outline: 1px dashed #93c5fd;
-    outline-offset: 2px;
-    cursor: text;
-    border-radius: 2px;
-  }
-  [contenteditable="true"]:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: 2px;
-    background: #fff;
-  }
-
-  /* --- Print & PDF Media Styling --- */
-  .no-print {
-    display: block;
-  }
-  @page {
-    size: A4;
-    margin: 14mm;
-  }
-  @media print {
-    html, body {
-      width: 210mm;
-      background: #fff;
-      padding: 0;
-    }
-    .toolbar, .no-print, .col-action, .btn-del-row, .table-actions { display: none !important; }
-    .sheet {
-      box-shadow: none;
-      width: 100%;
-      max-width: 100%;
-      padding: 6mm 4mm;
-      border-radius: 0;
-    }
-    [contenteditable="true"]:hover, [contenteditable="true"]:focus { outline: none !important; }
-    .logo-box { border: none !important; background: transparent !important; }
-    .logo-box:not(.has-logo) { display: none !important; }
-
-    /* Tighten spacing so a typical invoice fits on one A4 page */
-    .top { padding-bottom: 16px; margin-bottom: 18px; }
-    .addresses { margin-bottom: 20px; }
-    .totals { margin-bottom: 20px; }
-    .amount-words { margin: -10px 0 18px 0; }
-    .payment { padding: 12px 18px; margin-bottom: 18px; }
-    .note { padding-top: 12px; }
-    .conditions-box { margin-top: 10px; padding-top: 10px; }
-    td { padding: 8px 8px 8px 0; }
-    th { padding: 6px 8px 6px 0; }
-
-    /* Avoid awkward splits across the page boundary */
-    .top, .addresses, table, .totals, .payment, .note, .conditions-box {
-      page-break-inside: avoid;
-    }
-  }
-
-  /* --- Condition Note (Optional) --- */
+  /* --- Optional Terms & Conditions --- */
   .conditions-box {
-    margin-top: 16px;
-    padding-top: 14px;
+    margin-top: 10px;
+    padding-top: 8px;
     border-top: 1px dashed var(--line);
-    font-size: 12px;
+    font-size: 10.5px;
     color: var(--muted);
-    line-height: 1.6;
+    line-height: 1.5;
   }
   .conditions-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
-    font-weight: 600;
+    margin-bottom: 4px;
+    font-weight: 700;
     color: var(--ink);
-    font-size: 11.5px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.8px;
   }
   body.lang-dv .conditions-header {
     text-transform: none;
@@ -553,27 +701,27 @@
   .btn-toggle-conditions {
     background: transparent;
     border: none;
-    color: #9ca3af;
+    color: #94a3b8;
     cursor: pointer;
-    font-size: 11px;
-    padding: 2px 6px;
+    font-size: 10px;
+    padding: 2px 5px;
     border-radius: 4px;
     transition: all 0.15s;
   }
   .btn-toggle-conditions:hover {
     color: var(--danger);
-    background: #fee2e2;
+    background: var(--danger-light);
   }
   .btn-add-condition {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     background: transparent;
-    border: 1px dashed #9ca3af;
+    border: 1px dashed #94a3b8;
     color: var(--muted);
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 10.5px;
+    border-radius: 4px;
     cursor: pointer;
     transition: all 0.15s;
   }
@@ -583,13 +731,134 @@
     background: var(--surface);
   }
 
+  /* Editable Highlight for Interactive Typing */
+  [contenteditable="true"] {
+    outline: none;
+    border-radius: 2px;
+    transition: background 0.15s, outline 0.15s;
+  }
+  [contenteditable="true"]:hover {
+    outline: 1px dashed #93c5fd;
+    outline-offset: 2px;
+    cursor: text;
+  }
+  [contenteditable="true"]:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    background: #ffffff;
+  }
+
+  /* --- Notification Toast --- */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #1e293b;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* --- STRICT PRINT CSS (Single A4 Page) --- */
+  .no-print {
+    display: block;
+  }
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  @media print {
+    html, body {
+      width: 210mm !important;
+      height: 297mm !important;
+      max-height: 297mm !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #ffffff !important;
+      overflow: hidden !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    .top-header,
+    .no-print,
+    .col-action,
+    .btn-del-row,
+    .table-actions,
+    .conditions-toggle-container,
+    .btn-toggle-conditions,
+    .totals-discount-action,
+    .toast {
+      display: none !important;
+    }
+    .document-viewport {
+      padding: 0 !important;
+      margin: 0 !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      overflow: hidden !important;
+      display: block !important;
+    }
+    .sheet-container {
+      width: 210mm !important;
+      height: 297mm !important;
+    }
+    .sheet-scaler {
+      transform: none !important;
+      width: 210mm !important;
+      height: 297mm !important;
+    }
+    .sheet {
+      width: 210mm !important;
+      height: 297mm !important;
+      min-height: 297mm !important;
+      max-height: 297mm !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      padding: 12mm 14mm 10mm 14mm !important;
+      page-break-after: avoid !important;
+      page-break-inside: avoid !important;
+      box-sizing: border-box !important;
+    }
+    [contenteditable="true"]:hover, [contenteditable="true"]:focus {
+      outline: none !important;
+    }
+    .logo-box {
+      border: none !important;
+      background: transparent !important;
+    }
+    .logo-box:not(.has-logo) {
+      display: none !important;
+    }
+    .top, .addresses, table, .totals-container, .payment, .bottom-section {
+      page-break-inside: avoid !important;
+    }
+  }
+
   /* Dedicated styling when rendering PDF clone */
   .rendering-pdf .no-print,
   .rendering-pdf .col-action,
   .rendering-pdf .table-actions,
   .rendering-pdf .conditions-toggle-container,
   .rendering-pdf .btn-toggle-conditions,
-  .rendering-pdf .totals-discount-action {
+  .rendering-pdf .totals-discount-action,
+  .rendering-pdf .toast {
     display: none !important;
   }
   .rendering-pdf .logo-box {
@@ -599,300 +868,432 @@
   .rendering-pdf .logo-box:not(.has-logo) {
     display: none !important;
   }
-  .rendering-pdf .top { padding-bottom: 16px; margin-bottom: 18px; }
-  .rendering-pdf .addresses { margin-bottom: 20px; }
-  .rendering-pdf .totals { margin-bottom: 20px; }
-  .rendering-pdf .amount-words { margin: -10px 0 18px 0; }
-  .rendering-pdf .payment { padding: 12px 18px; margin-bottom: 18px; }
-  .rendering-pdf .note { padding-top: 12px; }
-  .rendering-pdf .conditions-box { margin-top: 10px; padding-top: 10px; }
-  .rendering-pdf td { padding: 8px 8px 8px 0; }
-  .rendering-pdf th { padding: 6px 8px 6px 0; }
-  .rendering-pdf .sheet { padding: 6mm 4mm; box-shadow: none; }
+  .rendering-pdf [contenteditable="true"] {
+    outline: none !important;
+  }
+  .rendering-pdf .sheet {
+    box-shadow: none !important;
+  }
+
+  /* Responsive screen adaptations for mobile preview */
+  @media screen and (max-width: 600px) {
+    .top-header-inner {
+      padding: 8px 12px;
+    }
+    .header-left, .header-right {
+      width: 100%;
+      justify-content: space-between;
+    }
+    .btn {
+      padding: 7px 11px;
+      font-size: 12px;
+      flex: 1;
+    }
+    .document-viewport {
+      padding: 12px 6px 40px;
+    }
+  }
 </style>
 </head>
 <body class="lang-en" id="bodyRoot">
 
-  <!-- Action Toolbar -->
-  <div class="toolbar no-print">
-    <div class="lang-switch" id="langSwitch" role="group" aria-label="Language selector">
-      <button type="button" class="active" data-lang="en" onclick="setLang('en')">English</button>
-      <button type="button" data-lang="dv" onclick="setLang('dv')">ދިވެހި</button>
-    </div>
-    <div class="spacer"></div>
-    <button class="btn" id="downloadBtn" onclick="downloadPDF()" title="Download as A4 PDF">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
-      <span class="en" id="downloadBtnTextEn">Download PDF</span><span class="dv" id="downloadBtnTextDv">ޕީޑީއެފް ޑައުންލޯޑް</span>
-    </button>
-    <button class="btn secondary" id="waBtn" onclick="shareWhatsApp()" title="Share invoice via WhatsApp">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.29-1.39a9.9 9.9 0 004.75 1.21h.01c5.46 0 9.91-4.45 9.91-9.91C22 6.45 17.54 2 12.04 2zm0 18.02h-.01a8.27 8.27 0 01-4.22-1.15l-.3-.18-3.14.82.84-3.06-.2-.31a8.24 8.24 0 01-1.27-4.4c0-4.55 3.71-8.26 8.27-8.26 2.21 0 4.28.86 5.84 2.42a8.2 8.2 0 012.42 5.84c0 4.56-3.71 8.27-8.23 8.27zm4.52-6.2c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.16.25-.64.8-.78.97-.14.16-.29.18-.54.06-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.42-.14-.01-.31-.01-.48-.01s-.43.06-.66.31c-.23.25-.86.85-.86 2.06 0 1.22.89 2.4 1.01 2.56.12.16 1.75 2.67 4.24 3.74.59.26 1.06.41 1.42.52.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.1-.23-.16-.48-.28z"/></svg>
-      <span class="en" id="waBtnTextEn">WhatsApp</span><span class="dv" id="waBtnTextDv">ވަޓްސްއަޕް</span>
-    </button>
-  </div>
+  <!-- Fixed Top Header & Action Toolbar -->
+  <header class="top-header no-print">
+    <div class="top-header-inner">
+      <div class="header-left">
+        <!-- Language Switcher -->
+        <div class="lang-switch" id="langSwitch" role="group" aria-label="Language selector">
+          <button type="button" class="active" data-lang="en" onclick="setLang('en')">English</button>
+          <button type="button" data-lang="dv" onclick="setLang('dv')">ދިވެހި</button>
+        </div>
 
-  <!-- Printable Sheet Container -->
-  <div class="sheet" id="invoiceSheet">
-    <!-- Header / Brand Section -->
-    <div class="top">
-      <div>
-        <div class="logo-wrap">
-          <div class="logo-box" id="logoBox" onclick="triggerLogoUpload()" title="Click to add your company logo">
-            <span class="logo-placeholder no-print" id="logoPlaceholder">
-              <span class="en">+ Add Logo</span><span class="dv">+ ލޯގޯ އިތުރުކުރޭ</span>
-            </span>
-            <img id="logoImg" src="" alt="Company Logo">
-            <button type="button" class="logo-remove no-print" id="logoRemoveBtn" onclick="removeLogo(event)" title="Remove logo">✕</button>
-          </div>
-          <input type="file" id="logoInput" class="logo-input no-print" accept="image/*" onchange="handleLogoUpload(event)">
-        </div>
-        <p class="brand">
-          <span class="en" contenteditable="true">YOUR COMPANY NAME</span>
-          <span class="dv" contenteditable="true">ވިޔަފާރި / ކުންފުނީގެ ނަން</span>
-        </p>
-        <div class="brand-details">
-          <div>
-            <span class="en" contenteditable="true">Sinfia, Raiyvilla Magu, M. Muli, Maldives</span>
-            <span class="dv" contenteditable="true">ސިންފިއާ، ރަތްވިއްލާ މަގު، މުލި</span>
-          </div>
-          <div>
-            <span class="en" contenteditable="true">7900319 / 0000000</span>
-            <span class="dv" contenteditable="true">7900319 / 0000000</span>
-          </div>
-          <div>
-            <span class="en" contenteditable="true">info@sinfia.net</span>
-            <span class="dv" contenteditable="true">info@sinfia.net</span>
-          </div>
-          <div>
-            <span class="en">TIN / Reg: <span class="val" contenteditable="true">1001234GST001</span></span>
-            <span class="dv">ޓީ.އައި.އެން: <span class="val" contenteditable="true">1001234GST001</span></span>
-          </div>
-        </div>
-      </div>
-
-      <div class="invoice-label">
-        <h1>
-          <span class="en">INVOICE</span>
-          <span class="dv">އިންވޮއިސް</span>
-        </h1>
-        <div class="meta">
-          <div>
-            <span class="en">Invoice No:</span><span class="dv">އިންވޮއިސް ނަންބަރު:</span>
-            <span class="val" id="invoiceNo" contenteditable="true">INV-2026-001</span>
-          </div>
-          <div>
-            <span class="en">PO No:</span><span class="dv">ޕީ.އޯ ނަންބަރު:</span>
-            <span class="val" contenteditable="true">PO-2026-001</span>
-          </div>
-          <div>
-            <span class="en">Date:</span><span class="dv">ތާރީޚު:</span>
-            <span class="val" contenteditable="true">16/09/2026</span>
-          </div>
-          <div>
-            <span class="en">Due Date:</span><span class="dv">ދައްކަންޖެހޭ ތާރީޚު:</span>
-            <span class="val" contenteditable="true">30/09/2026</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Billed To Section -->
-    <div class="addresses">
-      <div class="addr-block">
-        <div class="addr-label">
-          <span class="en">Billed To</span>
-          <span class="dv">ބިލް ރައްދުވާ ފަރާތް</span>
-        </div>
-        <div class="addr-name">
-          <span class="en" contenteditable="true">Client Name / Business Name</span>
-          <span class="dv" contenteditable="true">ކަސްޓަމަރުގެ ނަން / ކުންފުނީގެ ނަން</span>
-        </div>
-        <div class="addr-text">
-          <span class="en" contenteditable="true">Male', Republic of Maldives<br>Phone: +960 999-0000<br>TIN: 1009999GST001</span>
-          <span class="dv" contenteditable="true">މާލެ، ދިވެހިރާއްޖެ<br>ފޯނު: 999-0000 960+<br>ޓީ.އައި.އެން: 1009999GST001</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Line Items Table -->
-    <table>
-      <thead>
-        <tr>
-          <th class="col-action no-print"></th>
-          <th>
-            <span class="en">Description of Goods / Services</span>
-            <span class="dv">ޚިދުމަތުގެ / މުދަލުގެ ތަފްޞީލު</span>
-          </th>
-          <th class="num" style="width: 75px;">
-            <span class="en">Qty</span>
-            <span class="dv">އަދަދު</span>
-          </th>
-          <th class="num" style="width: 140px;">
-            <span class="en">Unit Price (MVR)</span>
-            <span class="dv">ވަކި އަގު (ރުފިޔާ)</span>
-          </th>
-          <th class="num" style="width: 140px;">
-            <span class="en">Total (MVR)</span>
-            <span class="dv">ޖުމްލަ އަގު (ރުފިޔާ)</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody id="itemsBody">
-        <tr class="item-row">
-          <td class="col-action no-print">
-            <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
-          </td>
-          <td>
-            <span class="en" contenteditable="true">Web Development & Hosting Services</span>
-            <span class="dv" contenteditable="true">ވެބްސައިޓް ހެދުމާއި ހޯސްޓިންގ ޚިދުމަތް</span>
-          </td>
-          <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
-          <td class="num item-price" contenteditable="true" oninput="recalc()">3,500.00</td>
-          <td class="num item-total font-semibold">3,500.00</td>
-        </tr>
-        <tr class="item-row">
-          <td class="col-action no-print">
-            <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
-          </td>
-          <td>
-            <span class="en" contenteditable="true">Domain Name Registration (.mv - 1 Year)</span>
-            <span class="dv" contenteditable="true">ޑޮމެއިން ރަޖިސްޓްރޭޝަން (mv. - 1 އަހަރު)</span>
-          </td>
-          <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
-          <td class="num item-price" contenteditable="true" oninput="recalc()">500.00</td>
-          <td class="num item-total font-semibold">500.00</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="table-actions no-print" style="display: flex; gap: 8px; flex-wrap: wrap;">
-      <button type="button" class="btn-add-item" onclick="addRow()">
-        <span>+</span>
-        <span class="en">Add Line Item</span>
-        <span class="dv">އައިޓަމެއް އިތުރުކުރޭ</span>
-      </button>
-      <button type="button" class="btn-add-item" onclick="addDiscountItemRow()">
-        <span>+</span>
-        <span class="en">Add Discount Line</span>
-        <span class="dv">ޑިސްކައުންޓް ލައިނެއް އިތުރުކުރޭ</span>
-      </button>
-    </div>
-
-    <!-- Totals Summary -->
-    <div class="totals">
-      <div class="totals-box">
-        <div class="totals-row">
-          <span>
-            <span class="en">Subtotal</span>
-            <span class="dv">ޖުމްލަ އަގު</span>
-          </span>
-          <span class="val" id="subtotalVal">MVR 4,000.00</span>
-        </div>
-        <div class="totals-row" id="discountRow" style="display: flex;">
-          <span style="display: inline-flex; align-items: center; gap: 6px;">
-            <span class="en">Discount</span>
-            <span class="dv">ޑިސްކައުންޓް</span>
-            <button type="button" class="btn-del-row no-print" onclick="toggleDiscount(false)" title="Hide discount" style="padding: 1px 5px; font-size: 11px;">✕</button>
-          </span>
-          <span class="val" id="discountVal" contenteditable="true" oninput="recalc()" onfocus="formatDiscountFocus()" onblur="formatDiscountBlur()">0.00</span>
-        </div>
-        <div class="totals-row">
-          <span>
-            <span class="en">GST (<span id="gstRateDisplay" class="gst-rate-edit" title="Click to change GST %" onclick="changeGSTRate()">8%</span>)</span>
-            <span class="dv">ޖީ.އެސް.ޓީ (<span id="gstRateDisplayDv" class="gst-rate-edit" title="Click to change GST %" onclick="changeGSTRate()">%8</span>)</span>
-          </span>
-          <span class="val" id="gstVal">MVR 320.00</span>
-        </div>
-        <div class="totals-row grand">
-          <span>
-            <span class="en">Total Amount Due</span>
-            <span class="dv">ދައްކަންޖެހޭ ޖުމްލަ</span>
-          </span>
-          <span class="val" id="grandTotalVal">MVR 4,320.00</span>
-        </div>
-        <div class="no-print totals-discount-action" id="discountBtnWrapper" style="display: none; text-align: right; margin-top: 6px;">
-          <button type="button" class="btn-add-condition" onclick="toggleDiscount(true)" style="font-size: 11px; padding: 3px 8px;">
-            <span>+</span>
-            <span class="en">Add Discount</span>
-            <span class="dv">ޑިސްކައުންޓް އިތުރުކުރޭ</span>
+        <!-- Mobile/Tablet Screen View Mode: Fit Page vs 100% Zoom -->
+        <div class="view-switch" id="viewSwitch" role="group" aria-label="View mode">
+          <button type="button" class="active" id="btnFit" onclick="setViewMode('fit')" title="Fit A4 document to screen">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+            <span class="en">Fit</span><span class="dv">ފިޓް</span>
+          </button>
+          <button type="button" id="btnActual" onclick="setViewMode('actual')" title="View 100% actual size">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>
+            <span class="en">100%</span><span class="dv">100%</span>
           </button>
         </div>
-      </div>
-    </div>
 
-    <!-- Amount in Words -->
-    <div class="amount-words">
-      <span class="en">Amount in Words:</span>
-      <span class="dv">ފައިސާގެ ޢަދަދު ބަހުން:</span>
-      <span class="val">
-        <span class="en" id="wordsEn" contenteditable="true">Four Thousand Three Hundred Twenty Maldivian Rufiyaa Only</span>
-        <span class="dv" id="wordsDv" contenteditable="true">ހަތަރު ހާސް ތިންސަތޭކަ ވިހި ރުފިޔާ ހަމައެކަނި</span>
-      </span>
-    </div>
+        <div class="doc-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          <span class="en">A4 Portrait (1 Page)</span>
+          <span class="dv">A4 ސޮފްޙާ (1 ގަނޑު)</span>
+        </div>
+      </div>
 
-    <!-- Payment Account Information -->
-    <div class="payment">
-      <div class="payment-label">
-        <span class="en">Bank Account Details for Payment</span>
-        <span class="dv">ފައިސާ ޖަމާކުރަންވީ އެކައުންޓް މަޢުލޫމާތު</span>
-      </div>
-      <div class="payment-row">
-        <span class="k"><span class="en">Bank Name</span><span class="dv">ބޭންކުގެ ނަން</span></span>
-        <span class="v">
-          <span class="en" contenteditable="true">Name of Bank()</span>
-          <span class="dv" contenteditable="true">ބޭންކް ގެ ނަން ()</span>
-        </span>
-      </div>
-      <div class="payment-row">
-        <span class="k"><span class="en">Account Name</span><span class="dv">އެކައުންޓްގެ ނަން</span></span>
-        <span class="v">
-          <span class="en" contenteditable="true">Your Business Name Pvt Ltd</span>
-          <span class="dv" contenteditable="true">ކުންފުނީގެ އެކައުންޓް ނަން</span>
-        </span>
-      </div>
-      <div class="payment-row">
-        <span class="k"><span class="en">Account No. (MVR)</span><span class="dv">އެކައުންޓް ނަންބަރު (ރުފިޔާ)</span></span>
-        <span class="v" contenteditable="true">7700 000000 001</span>
-      </div>
-    </div>
+      <!-- Action Buttons: Print, Share, Download PDF -->
+      <div class="header-right">
+        <!-- Print Button -->
+        <button type="button" class="btn btn-outline" id="printBtn" onclick="printDocument()" title="Print this A4 document">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span class="en">Print</span><span class="dv">ޕްރިންޓް</span>
+        </button>
 
-    <!-- Invoice Footer / Note -->
-    <div class="note">
-      <span class="en" contenteditable="true">Note: This is a computer-generated invoice and does not require a physical signature. Payments are requested to be made via bank transfer to the account stated above within 14 days of issue.</span>
-      <span class="dv" contenteditable="true">ނޯޓު: މިއީ ކޮމްޕިއުޓަރުން ތައްޔާރުކުރެވިފައިވާ ރަސްމީ އިންވޮއިސްއަކަށް ވާތީ ސޮއިކުރަން ނުޖެހޭނެއެވެ. މި އިންވޮއިސްއާ ގުޅޭގޮތުން އެއްވެސް މަޢުލޫމާތެއް ސާފުކުރައްވަން ބޭނުންފުޅުނަމަ، މަތީގައިވާ ފޯނު ނަންބަރަށް ގުޅުއްވުން އެދެމެވެ.</span>
-    </div>
+        <!-- Native Share Button -->
+        <button type="button" class="btn btn-success" id="shareBtn" onclick="shareDocument()" title="Share A4 PDF via device share sheet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span class="en" id="shareBtnTextEn">Share</span><span class="dv" id="shareBtnTextDv">ޝެއަރ</span>
+        </button>
 
-    <!-- Condition Note (Optional / If needed) -->
-    <div class="conditions-box" id="conditionsBlock">
-      <div class="conditions-header">
-        <span>
-          <span class="en">Terms & Conditions / Special Notes:</span>
-          <span class="dv">ޝަރުޠުތައް / ޚާއްޞަ ނޯޓު:</span>
-        </span>
-        <button type="button" class="btn-toggle-conditions no-print" onclick="toggleConditions(false)" title="Hide condition note if not needed">
-          <span class="en">✕ Hide Note</span><span class="dv">✕ ނޯޓު ފޮރުވާ</span>
+        <!-- Download A4 PDF Button -->
+        <button type="button" class="btn btn-accent" id="downloadBtn" onclick="downloadPDF()" title="Download exact 1-page A4 PDF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+          <span class="en" id="downloadBtnTextEn">Download PDF</span><span class="dv" id="downloadBtnTextDv">ޕީޑީއެފް ޑައުންލޯޑް</span>
         </button>
       </div>
-      <div class="conditions-text">
-        <span class="en" contenteditable="true">1. Goods / Services received in satisfactory condition.<br>2. Invoices past due date may incur additional administrative charges.<br>3. Inquiries regarding this invoice must be notified within 7 days of issue.</span>
-        <span class="dv" contenteditable="true">1. މުދާ ނުވަތަ ޚިދުމަތް ލިބިގަނެވުނީ އެދެވޭ ފެންވަރެއްގައެވެ.<br>2. ދައްކަންޖެހޭ މުއްދަތު ހަމަވުމަށްފަހު ފައިސާ ނުދައްކައިފިނަމަ އިތުރު އިދާރީ ފީއެއް ނެގިދާނެއެވެ.<br>3. މި އިންވޮއިސްއާ ގުޅޭ އެއްވެސް ޝަކުވާއެއްވާނަމަ ދޫކުރިތާ 7 ދުވަހުގެ ތެރޭގައި އެންގެވުން އެދެމެވެ.</span>
+    </div>
+  </header>
+
+  <!-- Document Viewport with Auto-Scaler for Mobile Responsiveness -->
+  <main class="document-viewport">
+    <div class="sheet-container" id="sheetContainer">
+      <div class="sheet-scaler" id="sheetScaler">
+        <!-- EXACT A4 PORTRAIT SHEET (210mm × 297mm) -->
+        <article class="sheet" id="invoiceSheet">
+          
+          <!-- Top Section: Header, Logo, Company Info & Invoice Meta -->
+          <section class="top">
+            <div class="brand-col">
+              <!-- Company Logo Upload -->
+              <div class="logo-wrap">
+                <div class="logo-box" id="logoBox" onclick="triggerLogoUpload()" title="Click to upload company logo">
+                  <span class="logo-placeholder no-print" id="logoPlaceholder">
+                    <span class="en">+ Add Logo</span><span class="dv">+ ލޯގޯ އިތުރުކުރޭ</span>
+                  </span>
+                  <img id="logoImg" src="" alt="Company Logo">
+                  <button type="button" class="logo-remove no-print" id="logoRemoveBtn" onclick="removeLogo(event)" title="Remove logo">✕</button>
+                </div>
+                <input type="file" id="logoInput" class="logo-input no-print" accept="image/*" onchange="handleLogoUpload(event)">
+              </div>
+
+              <!-- Company Name & Details -->
+              <h2 class="brand">
+                <span class="en" contenteditable="true">YOUR COMPANY NAME</span>
+                <span class="dv" contenteditable="true">ވިޔަފާރި / ކުންފުނީގެ ނަން</span>
+              </h2>
+              <div class="brand-details">
+                <div>
+                  <span class="en" contenteditable="true">Sinfia, Raiyvilla Magu, M. Muli, Maldives</span>
+                  <span class="dv" contenteditable="true">ސިންފިއާ، ރަތްވިއްލާ މަގު، މުލި</span>
+                </div>
+                <div>
+                  <span class="en" contenteditable="true">Phone: +960 7900319 / 7700000</span>
+                  <span class="dv" contenteditable="true">ފޯނު: 7900319 / 7700000 960+</span>
+                </div>
+                <div>
+                  <span class="en" contenteditable="true">Email: info@sinfia.net</span>
+                  <span class="dv" contenteditable="true">އީމެއިލް: info@sinfia.net</span>
+                </div>
+                <div>
+                  <span class="en">TIN / Reg: <span class="val num-ltr" contenteditable="true">1001234GST001</span></span>
+                  <span class="dv">ޓީ.އައި.އެން: <span class="val num-ltr" contenteditable="true">1001234GST001</span></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Invoice Label & Meta Information -->
+            <div class="invoice-label">
+              <h1>
+                <span class="en">INVOICE</span>
+                <span class="dv">އިންވޮއިސް</span>
+              </h1>
+              <div class="meta">
+                <div>
+                  <span class="en">Invoice No:</span><span class="dv">އިންވޮއިސް ނަންބަރު:</span>
+                  <span class="val num-ltr" id="invoiceNo" contenteditable="true">INV-2026-001</span>
+                </div>
+                <div>
+                  <span class="en">PO No:</span><span class="dv">ޕީ.އޯ ނަންބަރު:</span>
+                  <span class="val num-ltr" contenteditable="true">PO-2026-001</span>
+                </div>
+                <div>
+                  <span class="en">Date:</span><span class="dv">ތާރީޚު:</span>
+                  <span class="val num-ltr" contenteditable="true">16/09/2026</span>
+                </div>
+                <div>
+                  <span class="en">Due Date:</span><span class="dv">ދައްކަންޖެހޭ ތާރީޚު:</span>
+                  <span class="val num-ltr" contenteditable="true">30/09/2026</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Middle Section: Billed To Customer Details -->
+          <section class="addresses">
+            <div class="addr-block">
+              <div class="addr-label">
+                <span class="en">Billed To</span>
+                <span class="dv">ބިލް ރައްދުވާ ފަރާތް</span>
+              </div>
+              <div class="addr-name">
+                <span class="en" contenteditable="true">Client Name / Business Name</span>
+                <span class="dv" contenteditable="true">ކަސްޓަމަރުގެ ނަން / ކުންފުނީގެ ނަން</span>
+              </div>
+              <div class="addr-text">
+                <span class="en" contenteditable="true">Male', Republic of Maldives<br>Phone: <span class="num-ltr">+960 999-0000</span><br>TIN: <span class="num-ltr">1009999GST001</span></span>
+                <span class="dv" contenteditable="true">މާލެ، ދިވެހިރާއްޖެ<br>ފޯނު: <span class="num-ltr">+960 999-0000</span><br>ޓީ.އައި.އެން: <span class="num-ltr">1009999GST001</span></span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Line Items Table -->
+          <section class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="col-action no-print"></th>
+                  <th>
+                    <span class="en">Description of Goods / Services</span>
+                    <span class="dv">ޚިދުމަތުގެ / މުދަލުގެ ތަފްޞީލު</span>
+                  </th>
+                  <th class="num" style="width: 70px;">
+                    <span class="en">Qty</span>
+                    <span class="dv">އަދަދު</span>
+                  </th>
+                  <th class="num" style="width: 130px;">
+                    <span class="en">Unit Price (MVR)</span>
+                    <span class="dv">ވަކި އަގު (ރުފިޔާ)</span>
+                  </th>
+                  <th class="num" style="width: 130px;">
+                    <span class="en">Total (MVR)</span>
+                    <span class="dv">ޖުމްލަ އަގު (ރުފިޔާ)</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="itemsBody">
+                <tr class="item-row">
+                  <td class="col-action no-print">
+                    <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
+                  </td>
+                  <td>
+                    <span class="en" contenteditable="true">Web Development & Hosting Services</span>
+                    <span class="dv" contenteditable="true">ވެބްސައިޓް ހެދުމާއި ހޯސްޓިންގ ޚިދުމަތް</span>
+                  </td>
+                  <td class="num item-qty num-ltr" contenteditable="true" oninput="recalc()">1</td>
+                  <td class="num item-price num-ltr" contenteditable="true" oninput="recalc()">3,500.00</td>
+                  <td class="num item-total num-ltr font-semibold">3,500.00</td>
+                </tr>
+                <tr class="item-row">
+                  <td class="col-action no-print">
+                    <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
+                  </td>
+                  <td>
+                    <span class="en" contenteditable="true">Domain Name Registration (.mv - 1 Year)</span>
+                    <span class="dv" contenteditable="true">ޑޮމެއިން ރަޖިސްޓްރޭޝަން (mv. - 1 އަހަރު)</span>
+                  </td>
+                  <td class="num item-qty num-ltr" contenteditable="true" oninput="recalc()">1</td>
+                  <td class="num item-price num-ltr" contenteditable="true" oninput="recalc()">500.00</td>
+                  <td class="num item-total num-ltr font-semibold">500.00</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="table-actions no-print">
+              <button type="button" class="btn-add-item" onclick="addRow()">
+                <span>+</span>
+                <span class="en">Add Line Item</span>
+                <span class="dv">އައިޓަމެއް އިތުރުކުރޭ</span>
+              </button>
+              <button type="button" class="btn-add-item" onclick="addDiscountItemRow()">
+                <span>+</span>
+                <span class="en">Add Discount Line</span>
+                <span class="dv">ޑިސްކައުންޓް ލައިނެއް އިތުރުކުރޭ</span>
+              </button>
+            </div>
+          </section>
+
+          <!-- Totals Summary Box -->
+          <section class="totals-container">
+            <div class="totals-box">
+              <div class="totals-row">
+                <span>
+                  <span class="en">Subtotal</span>
+                  <span class="dv">ޖުމްލަ އަގު</span>
+                </span>
+                <span class="val num-ltr" id="subtotalVal">MVR 4,000.00</span>
+              </div>
+              <div class="totals-row" id="discountRow" style="display: flex;">
+                <span style="display: inline-flex; align-items: center; gap: 5px;">
+                  <span class="en">Discount</span>
+                  <span class="dv">ޑިސްކައުންޓް</span>
+                  <button type="button" class="btn-del-row no-print" onclick="toggleDiscount(false)" title="Hide discount" style="padding: 0 4px; font-size: 11px;">✕</button>
+                </span>
+                <span class="val num-ltr" id="discountVal" contenteditable="true" oninput="recalc()" onfocus="formatDiscountFocus()" onblur="formatDiscountBlur()">0.00</span>
+              </div>
+              <div class="totals-row">
+                <span>
+                  <span class="en">GST (<span id="gstRateDisplay" class="gst-rate-edit num-ltr" title="Click to change GST %" onclick="changeGSTRate()">8%</span>)</span>
+                  <span class="dv">ޖީ.އެސް.ޓީ (<span id="gstRateDisplayDv" class="gst-rate-edit num-ltr" title="Click to change GST %" onclick="changeGSTRate()">8%</span>)</span>
+                </span>
+                <span class="val num-ltr" id="gstVal">MVR 320.00</span>
+              </div>
+              <div class="totals-row grand">
+                <span>
+                  <span class="en">Total Amount Due</span>
+                  <span class="dv">ދައްކަންޖެހޭ ޖުމްލަ</span>
+                </span>
+                <span class="val num-ltr" id="grandTotalVal">MVR 4,320.00</span>
+              </div>
+              <div class="no-print totals-discount-action" id="discountBtnWrapper" style="display: none; text-align: right; margin-top: 4px;">
+                <button type="button" class="btn-add-condition" onclick="toggleDiscount(true)">
+                  <span>+</span>
+                  <span class="en">Add Discount</span>
+                  <span class="dv">ޑިސްކައުންޓް އިތުރުކުރޭ</span>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Amount in Words -->
+          <section class="amount-words">
+            <strong class="en">Amount in Words: </strong>
+            <strong class="dv">ފައިސާގެ ޢަދަދު ބަހުން: </strong>
+            <span class="val">
+              <span class="en" id="wordsEn" contenteditable="true">Four Thousand Three Hundred Twenty Maldivian Rufiyaa Only</span>
+              <span class="dv" id="wordsDv" contenteditable="true">ހަތަރު ހާސް ތިންސަތޭކަ ވިހި ރުފިޔާ ހަމައެކަނި</span>
+            </span>
+          </section>
+
+          <!-- Payment Account Information -->
+          <section class="payment">
+            <div class="payment-label">
+              <span class="en">Bank Account Details for Payment</span>
+              <span class="dv">ފައިސާ ޖަމާކުރަންވީ އެކައުންޓް މަޢުލޫމާތު</span>
+            </div>
+            <div class="payment-row">
+              <span class="k"><span class="en">Bank Name</span><span class="dv">ބޭންކުގެ ނަން</span></span>
+              <span class="v">
+                <span class="en" contenteditable="true">Bank of Maldives (BML)</span>
+                <span class="dv" contenteditable="true">ބޭންކް އޮފް މޯލްޑިވްސް (ބީ.އެމް.އެލް)</span>
+              </span>
+            </div>
+            <div class="payment-row">
+              <span class="k"><span class="en">Account Name</span><span class="dv">އެކައުންޓްގެ ނަން</span></span>
+              <span class="v">
+                <span class="en" contenteditable="true">Your Business Name Pvt Ltd</span>
+                <span class="dv" contenteditable="true">ކުންފުނީގެ އެކައުންޓް ނަން</span>
+              </span>
+            </div>
+            <div class="payment-row">
+              <span class="k"><span class="en">Account No. (MVR)</span><span class="dv">އެކައުންޓް ނަންބަރު (ރުފިޔާ)</span></span>
+              <span class="v num-ltr" contenteditable="true">7704 000000 001</span>
+            </div>
+          </section>
+
+          <!-- Bottom Section: Official Note and Optional Terms -->
+          <footer class="bottom-section">
+            <div class="note">
+              <span class="en" contenteditable="true">Note: This is a computer-generated invoice and does not require a physical signature. Payments are requested to be made via bank transfer to the account stated above within 14 days of issue.</span>
+              <span class="dv" contenteditable="true">ނޯޓު: މިއީ ކޮމްޕިއުޓަރުން ތައްޔާރުކުރެވިފައިވާ ރަސްމީ އިންވޮއިސްއަކަށް ވާތީ ސޮއިކުރަން ނުޖެހޭނެއެވެ. މި އިންވޮއިސްއާ ގުޅޭގޮތުން އެއްވެސް މަޢުލޫމާތެއް ސާފުކުރައްވަން ބޭނުންފުޅުނަމަ، މަތީގައިވާ ފޯނު ނަންބަރަށް ގުޅުއްވުން އެދެމެވެ.</span>
+            </div>
+
+            <!-- Optional Condition Notes -->
+            <div class="conditions-box" id="conditionsBlock">
+              <div class="conditions-header">
+                <span>
+                  <span class="en">Terms & Conditions / Special Notes:</span>
+                  <span class="dv">ޝަރުޠުތައް / ޚާއްޞަ ނޯޓު:</span>
+                </span>
+                <button type="button" class="btn-toggle-conditions no-print" onclick="toggleConditions(false)" title="Hide notes">
+                  <span class="en">✕ Hide Note</span><span class="dv">✕ ނޯޓު ފޮރުވާ</span>
+                </button>
+              </div>
+              <div class="conditions-text">
+                <span class="en" contenteditable="true">1. Goods / Services received in satisfactory condition.<br>2. Invoices past due date may incur additional administrative charges.<br>3. Inquiries regarding this invoice must be notified within 7 days of issue.</span>
+                <span class="dv" contenteditable="true">1. މުދާ ނުވަތަ ޚިދުމަތް ލިބިގަނެވުނީ އެދެވޭ ފެންވަރެއްގައެވެ.<br>2. ދައްކަންޖެހޭ މުއްދަތު ހަމަވުމަށްފަހު ފައިސާ ނުދައްކައިފިނަމަ އިތުރު އިދާރީ ފީއެއް ނެގިދާނެއެވެ.<br>3. މި އިންވޮއިސްއާ ގުޅޭ އެއްވެސް ޝަކުވާއެއްވާނަމަ ދޫކުރިތާ 7 ދުވަހުގެ ތެރޭގައި އެންގެވުން އެދެމެވެ.</span>
+              </div>
+            </div>
+
+            <div class="conditions-toggle-container no-print" id="conditionsAddBtnWrapper" style="display: none; margin-top: 8px; text-align: center;">
+              <button type="button" class="btn-add-condition" onclick="toggleConditions(true)">
+                <span>+</span>
+                <span class="en">Add Condition Note</span>
+                <span class="dv">ޝަރުޠު ނޯޓެއް އިތުރުކުރޭ</span>
+              </button>
+            </div>
+          </footer>
+
+        </article>
       </div>
     </div>
+  </main>
 
-    <div class="conditions-toggle-container no-print" id="conditionsAddBtnWrapper" style="display: none; margin-top: 14px; text-align: center;">
-      <button type="button" class="btn-add-condition" onclick="toggleConditions(true)">
-        <span>+</span>
-        <span class="en">Add Condition Note</span>
-        <span class="dv">ޝަރުޠު ނޯޓެއް އިތުރުކުރޭ</span>
-      </button>
-    </div>
+  <!-- Notification Toast -->
+  <div class="toast" id="toast">
+    <span id="toastMsg">Notification message</span>
   </div>
 
+  <!-- Scripts: html2canvas & jsPDF for exact A4 PDF Generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    let currentGstRate = 8.0; // Default Maldivian GST rate
 
-    /* --- Logo Upload --- */
+  <script>
+    let currentGstRate = 8.0; // Standard Maldivian GST rate
+    let hasDiscount = true;
+    let currentViewMode = 'fit'; // 'fit' or 'actual'
+
+    /* --- Toast Notification Helper --- */
+    function showToast(msg, duration = 3000) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMsg');
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = msg;
+      toast.classList.add('show');
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, duration);
+    }
+
+    /* --- Responsive A4 Screen Scaling --- */
+    function updateSheetScale() {
+      const scaler = document.getElementById('sheetScaler');
+      const container = document.getElementById('sheetContainer');
+      if (!scaler || !container) return;
+
+      if (currentViewMode === 'actual') {
+        scaler.style.transform = 'none';
+        container.style.width = '210mm';
+        container.style.height = 'auto';
+        return;
+      }
+
+      // 'fit' mode: calculate scale to fit current viewport width
+      const viewportWidth = window.innerWidth;
+      const sheetWidth = 794; // 210mm in pixels at 96 DPI
+      const sheetHeight = 1123; // 297mm in pixels at 96 DPI
+
+      // Allow 24px margin on mobile
+      const availableWidth = Math.max(300, viewportWidth - 24);
+
+      if (availableWidth < sheetWidth) {
+        const scale = availableWidth / sheetWidth;
+        scaler.style.transform = `scale(${scale})`;
+        container.style.width = `${sheetWidth * scale}px`;
+        container.style.height = `${sheetHeight * scale}px`;
+      } else {
+        scaler.style.transform = 'none';
+        container.style.width = '210mm';
+        container.style.height = 'auto';
+      }
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      document.getElementById('btnFit')?.classList.toggle('active', mode === 'fit');
+      document.getElementById('btnActual')?.classList.toggle('active', mode === 'actual');
+      updateSheetScale();
+    }
+
+    window.addEventListener('resize', updateSheetScale);
+    window.addEventListener('orientationchange', () => setTimeout(updateSheetScale, 200));
+
+    /* --- Logo Upload & Remove --- */
     function triggerLogoUpload() {
       const box = document.getElementById('logoBox');
       if (!box.classList.contains('has-logo')) {
@@ -904,7 +1305,7 @@
       const file = e.target.files[0];
       if (!file) return;
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file.');
+        alert('Please select an image file (PNG, JPG, SVG, WebP).');
         return;
       }
       const reader = new FileReader();
@@ -914,6 +1315,7 @@
         img.style.display = 'block';
         document.getElementById('logoPlaceholder').style.display = 'none';
         document.getElementById('logoBox').classList.add('has-logo');
+        showToast('Logo updated successfully');
       };
       reader.readAsDataURL(file);
     }
@@ -926,9 +1328,10 @@
       document.getElementById('logoPlaceholder').style.display = 'flex';
       document.getElementById('logoBox').classList.remove('has-logo');
       document.getElementById('logoInput').value = '';
+      showToast('Logo removed');
     }
 
-    /* --- Optional Condition Note Toggle --- */
+    /* --- Conditions Toggle --- */
     function toggleConditions(show) {
       const block = document.getElementById('conditionsBlock');
       const addBtnWrapper = document.getElementById('conditionsAddBtnWrapper');
@@ -941,9 +1344,7 @@
       }
     }
 
-    /* --- Optional Discount Toggle & Formatting --- */
-    let hasDiscount = true;
-
+    /* --- Discount Toggle & Focus Handlers --- */
     function toggleDiscount(show) {
       hasDiscount = show;
       const row = document.getElementById('discountRow');
@@ -991,7 +1392,7 @@
       });
     }
 
-    /* --- Number & String Parsing Helpers --- */
+    /* --- Number Parsing & Formatting Helpers --- */
     function parseNum(val) {
       if (!val) return 0;
       const clean = val.replace(/[^0-9.-]+/g, '');
@@ -1006,16 +1407,8 @@
       });
     }
 
-    /* --- Real-Time Calculations --- */
+    /* --- Real-Time Recalculation --- */
     function recalc() {
-      if (typeof pendingDownload !== 'undefined' && pendingDownload) {
-        pendingDownload = null;
-        if (document.getElementById('downloadBtnTextEn')) resetDownloadBtn();
-      }
-      if (typeof pendingShare !== 'undefined' && pendingShare) {
-        pendingShare = null;
-        if (document.getElementById('waBtnTextEn')) resetWaBtn();
-      }
       const rows = document.querySelectorAll('#itemsBody .item-row');
       let subtotal = 0;
 
@@ -1065,12 +1458,12 @@
           <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
         </td>
         <td>
-          <span class="en" contenteditable="true">New Item Description</span>
-          <span class="dv" contenteditable="true">އައު އައިޓަމުގެ ތަފްޞީލު</span>
+          <span class="en" contenteditable="true">New Goods or Service Item</span>
+          <span class="dv" contenteditable="true">އައު މުދާ ނުވަތަ ޚިދުމަތުގެ ތަފްޞީލު</span>
         </td>
-        <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
-        <td class="num item-price" contenteditable="true" oninput="recalc()">0.00</td>
-        <td class="num item-total font-semibold">0.00</td>
+        <td class="num item-qty num-ltr" contenteditable="true" oninput="recalc()">1</td>
+        <td class="num item-price num-ltr" contenteditable="true" oninput="recalc()">0.00</td>
+        <td class="num item-total num-ltr font-semibold">0.00</td>
       `;
       tbody.appendChild(tr);
       recalc();
@@ -1085,12 +1478,12 @@
           <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
         </td>
         <td>
-          <span class="en" contenteditable="true">Discount / Special Allowance</span>
-          <span class="dv" contenteditable="true">ޑިސްކައުންޓް / ޚާއްޞަ ލުއި</span>
+          <span class="en" contenteditable="true">Special Discount / Promotional Allowance</span>
+          <span class="dv" contenteditable="true">ޚާއްޞަ ޑިސްކައުންޓް / ލުއި</span>
         </td>
-        <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
-        <td class="num item-price" style="color: #dc2626;" contenteditable="true" oninput="recalc()">-100.00</td>
-        <td class="num item-total font-semibold" style="color: #dc2626;">-100.00</td>
+        <td class="num item-qty num-ltr" contenteditable="true" oninput="recalc()">1</td>
+        <td class="num item-price num-ltr" style="color: #dc2626;" contenteditable="true" oninput="recalc()">-100.00</td>
+        <td class="num item-total num-ltr font-semibold" style="color: #dc2626;">-100.00</td>
       `;
       tbody.appendChild(tr);
       recalc();
@@ -1100,28 +1493,29 @@
       const tbody = document.getElementById('itemsBody');
       const rows = tbody.querySelectorAll('.item-row');
       if (rows.length <= 1) {
-        alert("An invoice must have at least one line item.");
+        alert("An official invoice must have at least one line item.");
         return;
       }
       btn.closest('tr').remove();
       recalc();
     }
 
-    /* --- Quick GST Rate Changer --- */
+    /* --- GST Rate Changer --- */
     function changeGSTRate() {
-      const promptText = prompt("Enter GST Rate percentage (e.g. 0, 8, 12, 16):", currentGstRate);
+      const promptText = prompt("Enter GST Rate percentage (e.g. 0, 6, 8, 12, 16):", currentGstRate);
       if (promptText !== null) {
         const parsed = parseFloat(promptText);
         if (!isNaN(parsed) && parsed >= 0) {
           currentGstRate = parsed;
           document.getElementById('gstRateDisplay').innerText = `${parsed}%`;
-          document.getElementById('gstRateDisplayDv').innerText = `%${parsed}`;
+          document.getElementById('gstRateDisplayDv').innerText = `${parsed}%`;
           recalc();
+          showToast(`GST rate set to ${parsed}%`);
         }
       }
     }
 
-    /* --- Simple English Number to Words Converter --- */
+    /* --- English Number to Words Converter --- */
     function numberToWords(num) {
       if (num === 0) return 'Zero';
       const a = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten',
@@ -1139,233 +1533,216 @@
       return inWords(num);
     }
 
-    /* --- PDF Generation & Export (forced single A4 page) --- */
-    function pdfFilename() {
-      const billNo = document.getElementById('invoiceNo')?.innerText.trim().replace(/[\/\\?%*:|"<>]/g, '-') || 'INV';
+    /* --- Filename Helper --- */
+    function getInvoiceFilename() {
+      const billNo = document.getElementById('invoiceNo')?.innerText.trim().replace(/[\/\\?%*:|"<>]/g, '-') || 'INV-001';
       return `Invoice_${billNo}.pdf`;
     }
 
-    const PDF_MARGIN_MM = 14;
-
-    // Renders the invoice sheet onto exactly one A4 page, shrinking it to fit if needed.
-    async function buildSinglePagePdf(el) {
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        letterRendering: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const maxWidth = pageWidth - PDF_MARGIN_MM * 2;
-      const maxHeight = pageHeight - PDF_MARGIN_MM * 2;
-
-      const canvasRatio = canvas.width / canvas.height;
-      let renderWidth = maxWidth;
-      let renderHeight = renderWidth / canvasRatio;
-
-      // If it's still too tall for one page, scale down by height instead so it always fits on a single A4 sheet.
-      if (renderHeight > maxHeight) {
-        renderHeight = maxHeight;
-        renderWidth = renderHeight * canvasRatio;
-      }
-
-      const x = (pageWidth - renderWidth) / 2;
-      const y = PDF_MARGIN_MM;
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
-      pdf.addImage(imgData, 'JPEG', x, y, renderWidth, renderHeight, undefined, 'FAST');
-
-      return pdf;
+    /* --- PRINT FUNCTION --- */
+    function printDocument() {
+      window.print();
     }
 
-    function isIOS() {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    }
+    /* --- EXACT 1-PAGE A4 PDF BUILDER --- */
+    const PDF_MARGIN_MM = 10; // Clean 10mm document print margins
 
-    /* --- Cross-platform file saving (desktop / iPhone / Android) ---
-       Prefers the Claude artifact "downloads" capability (works uniformly
-       inside the Claude app/web on every platform); falls back to normal
-       browser download / share behavior if that capability isn't present
-       (e.g. the page opened directly outside the Claude runtime). */
-    let downloadsApiPromise = null;
-    function getDownloadsApi() {
-      if (!downloadsApiPromise) {
-        downloadsApiPromise = (window.claude && typeof window.claude.use === 'function')
-          ? window.claude.use('downloads').catch(() => null)
-          : Promise.resolve(null);
-      }
-      return downloadsApiPromise;
-    }
+    async function buildSinglePageA4Pdf() {
+      const el = document.getElementById('invoiceSheet');
+      const scaler = document.getElementById('sheetScaler');
 
-    async function saveFile(filename, blob) {
-      const downloads = await getDownloadsApi();
-      if (downloads) {
-        try {
-          await downloads.save({ filename, data: blob });
-          return true;
-        } catch (err) {
-          if (err && err.code === 'declined') return false; // viewer said no; don't fall back
-          console.error('downloads.save failed, falling back', err);
-        }
-      }
-      // Legacy fallback for browsers outside the Claude artifact runtime
+      // Temporarily remove any mobile transform scale during high-res canvas rendering
+      const prevTransform = scaler.style.transform;
+      scaler.style.transform = 'none';
+      document.body.classList.add('rendering-pdf');
+
       try {
-        if (isIOS()) {
-          const file = new File([blob], filename, { type: 'application/pdf' });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: filename });
-            return true;
-          }
-          const url = URL.createObjectURL(blob);
-          window.open(url, '_blank');
-          setTimeout(() => URL.revokeObjectURL(url), 60000);
-          return true;
+        await document.fonts.ready;
+
+        const canvas = await html2canvas(el, {
+          scale: 2.5, // Crisp high-definition text rendering
+          useCORS: true,
+          letterRendering: true,
+          logging: false,
+          backgroundColor: '#ffffff'
+        });
+
+        const { jsPDF } = window.jspdf;
+        // Standard A4 portrait: 210mm x 297mm
+        const pdf = new jsPDF({
+          unit: 'mm',
+          format: 'a4',
+          orientation: 'portrait',
+          compress: true
+        });
+
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const maxWidth = pageWidth - (PDF_MARGIN_MM * 2);
+        const maxHeight = pageHeight - (PDF_MARGIN_MM * 2);
+
+        const canvasRatio = canvas.width / canvas.height;
+        let renderWidth = maxWidth;
+        let renderHeight = renderWidth / canvasRatio;
+
+        // If height exceeds single page limit, scale by height to strictly fit exactly ONE A4 page
+        if (renderHeight > maxHeight) {
+          renderHeight = maxHeight;
+          renderWidth = renderHeight * canvasRatio;
         }
+
+        const x = (pageWidth - renderWidth) / 2;
+        const y = PDF_MARGIN_MM;
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        pdf.addImage(imgData, 'JPEG', x, y, renderWidth, renderHeight, undefined, 'FAST');
+
+        return pdf;
+      } finally {
+        document.body.classList.remove('rendering-pdf');
+        scaler.style.transform = prevTransform;
+        updateSheetScale();
+      }
+    }
+
+    /* --- Cross-Platform File Downloader --- */
+    async function savePdfBlob(blob, filename) {
+      try {
+        // Method 1: Modern File System Access API if available
+        if (window.showSaveFilePicker) {
+          try {
+            const handle = await window.showSaveFilePicker({
+              suggestedName: filename,
+              types: [{
+                description: 'PDF Document',
+                accept: { 'application/pdf': ['.pdf'] }
+              }]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            return true;
+          } catch (e) {
+            if (e.name === 'AbortError') return false;
+          }
+        }
+
+        // Method 2: Universal Blob URL download
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
+        a.style.display = 'none';
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        setTimeout(() => {
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }, 30000);
         return true;
       } catch (err) {
-        console.error('Fallback save failed', err);
+        console.error('Download error:', err);
         return false;
       }
     }
 
-    function resetDownloadBtn() {
-      const btn = document.getElementById('downloadBtn');
-      btn.disabled = false;
-      document.getElementById('downloadBtnTextEn').textContent = 'Download PDF';
-      document.getElementById('downloadBtnTextDv').textContent = 'ޕީޑީއެފް ޑައުންލޯޑް';
-    }
-
-    let pendingDownload = null; // { blob, filename } once generated, awaiting the confirming tap
-
+    /* --- DOWNLOAD PDF FUNCTION --- */
     async function downloadPDF() {
       const btn = document.getElementById('downloadBtn');
+      const textEn = document.getElementById('downloadBtnTextEn');
+      const textDv = document.getElementById('downloadBtnTextDv');
+      const filename = getInvoiceFilename();
 
-      // Second tap: a fresh, direct user gesture — save immediately so strict
-      // mobile browsers (iOS Safari, Android Chrome) don't block it.
-      if (pendingDownload) {
-        const { blob, filename } = pendingDownload;
-        pendingDownload = null;
-        btn.disabled = true;
-        document.getElementById('downloadBtnTextEn').textContent = 'Saving…';
-        document.getElementById('downloadBtnTextDv').textContent = 'ސޭވް ކުރަނީ…';
-        const ok = await saveFile(filename, blob);
-        resetDownloadBtn();
-        if (!ok) alert('Could not save the file — please try again.');
-        return;
-      }
-
-      // First tap: generate the PDF (this takes a moment, which is exactly
-      // why we don't try to save in the same step on mobile).
       btn.disabled = true;
-      document.getElementById('downloadBtnTextEn').textContent = 'Generating…';
-      document.getElementById('downloadBtnTextDv').textContent = 'ތައްޔާރުކުރަނީ…';
-      const el = document.getElementById('invoiceSheet');
-      const filename = pdfFilename();
+      textEn.textContent = 'Generating…';
+      textDv.textContent = 'ތައްޔާރުކުރަނީ…';
 
-      document.body.classList.add('rendering-pdf');
       try {
-        await document.fonts.ready;
-        const pdf = await buildSinglePagePdf(el);
+        const pdf = await buildSinglePageA4Pdf();
         const blob = pdf.output('blob');
-        pendingDownload = { blob, filename };
-        btn.disabled = false;
-        document.getElementById('downloadBtnTextEn').textContent = 'Tap to Save PDF';
-        document.getElementById('downloadBtnTextDv').textContent = 'ސޭވް ކުރަން ފިތާލާ';
+
+        textEn.textContent = 'Saving…';
+        textDv.textContent = 'ސޭވް ކުރަނީ…';
+
+        const success = await savePdfBlob(blob, filename);
+        if (success) {
+          showToast(`Downloaded: ${filename}`);
+        }
       } catch (err) {
-        console.error(err);
-        resetDownloadBtn();
-        alert('Could not generate the PDF — please try again.');
+        console.error('PDF generation error:', err);
+        alert('Could not generate PDF. Please try again or use the Print button.');
       } finally {
-        document.body.classList.remove('rendering-pdf');
+        btn.disabled = false;
+        textEn.textContent = 'Download PDF';
+        textDv.textContent = 'ޕީޑީއެފް ޑައުންލޯޑް';
       }
     }
 
-    /* --- WhatsApp Share --- */
-    function resetWaBtn() {
-      const btn = document.getElementById('waBtn');
-      btn.disabled = false;
-      document.getElementById('waBtnTextEn').textContent = 'WhatsApp';
-      document.getElementById('waBtnTextDv').textContent = 'ވަޓްސްއަޕް';
-    }
+    /* --- SHARE FUNCTION (Native Web Share API) --- */
+    async function shareDocument() {
+      const btn = document.getElementById('shareBtn');
+      const textEn = document.getElementById('shareBtnTextEn');
+      const textDv = document.getElementById('shareBtnTextDv');
+      const filename = getInvoiceFilename();
+      const invoiceNo = document.getElementById('invoiceNo')?.innerText.trim() || 'INV';
+      const grandTotal = document.getElementById('grandTotalVal')?.innerText.trim() || '';
 
-    let pendingShare = null; // { blob, filename } once generated, awaiting the confirming tap
+      btn.disabled = true;
+      textEn.textContent = 'Preparing…';
+      textDv.textContent = 'ތައްޔާރުކުރަނީ…';
 
-    async function shareWhatsApp() {
-      const btn = document.getElementById('waBtn');
-
-      // Second tap: fresh gesture — share/save immediately.
-      if (pendingShare) {
-        const { blob, filename } = pendingShare;
-        pendingShare = null;
-        btn.disabled = true;
-        document.getElementById('waBtnTextEn').textContent = 'Sharing…';
-        document.getElementById('waBtnTextDv').textContent = 'ޝެއަރ ކުރަނީ…';
-
+      try {
+        const pdf = await buildSinglePageA4Pdf();
+        const blob = pdf.output('blob');
         const file = new File([blob], filename, { type: 'application/pdf' });
-        let sharedDirectly = false;
+
+        // Check if device supports native file sharing
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
               files: [file],
               title: filename,
-              text: 'Invoice: ' + filename
+              text: `Invoice ${invoiceNo} (${grandTotal})`
             });
-            sharedDirectly = true;
-          } catch (err) {
-            // viewer cancelled the native share sheet, or it isn't usable here — fall back below
+            showToast('Invoice shared successfully');
+            return;
+          } catch (shareErr) {
+            if (shareErr.name === 'AbortError') return; // User closed share sheet
+            console.warn('File share failed, falling back to text share:', shareErr);
           }
         }
-        if (!sharedDirectly) {
-          await saveFile(filename, blob);
-          const msg = encodeURIComponent('Invoice attached: ' + filename + ' (Please attach the downloaded PDF file)');
-          window.open('https://wa.me/?text=' + msg, '_blank');
+
+        // Fallback 1: Text-only native share if files are not allowed
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: filename,
+              text: `Invoice ${invoiceNo} (${grandTotal})`
+            });
+            showToast('Invoice details shared');
+            return;
+          } catch (textShareErr) {
+            if (textShareErr.name === 'AbortError') return;
+          }
         }
-        resetWaBtn();
-        return;
-      }
 
-      // First tap: generate the PDF.
-      btn.disabled = true;
-      document.getElementById('waBtnTextEn').textContent = 'Preparing…';
-      document.getElementById('waBtnTextDv').textContent = 'ތައްޔާރުކުރަނީ…';
-      const el = document.getElementById('invoiceSheet');
-      const filename = pdfFilename();
-
-      document.body.classList.add('rendering-pdf');
-      try {
-        await document.fonts.ready;
-        const pdf = await buildSinglePagePdf(el);
-        const blob = pdf.output('blob');
-        pendingShare = { blob, filename };
-        btn.disabled = false;
-        document.getElementById('waBtnTextEn').textContent = 'Tap to Share';
-        document.getElementById('waBtnTextDv').textContent = 'ޝެއަރ ކުރަން ފިތާލާ';
+        // Fallback 2: WhatsApp link fallback for desktop browsers without Web Share
+        const waMsg = encodeURIComponent(`Invoice: ${invoiceNo} | Total: ${grandTotal}`);
+        window.open(`https://wa.me/?text=${waMsg}`, '_blank');
+        showToast('Opened WhatsApp');
       } catch (err) {
-        console.error(err);
-        resetWaBtn();
-        alert('Could not prepare the file — please try again.');
+        console.error('Share error:', err);
+        alert('Could not complete sharing. You can use Download PDF instead.');
       } finally {
-        document.body.classList.remove('rendering-pdf');
+        btn.disabled = false;
+        textEn.textContent = 'Share';
+        textDv.textContent = 'ޝެއަރ';
       }
     }
 
-    // Run initial calculation to sync values
+    // Initial setup
     recalc();
+    updateSheetScale();
   </script>
 </body>
 </html>
