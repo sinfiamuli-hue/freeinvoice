@@ -664,7 +664,7 @@
           </div>
           <div>
             <span class="en">TIN / Reg: <span class="val" contenteditable="true">1001234GST001</span></span>
-            <span class="dv">ޓިން: <span class="val" contenteditable="true">1001234GST001</span></span>
+            <span class="dv">ޓީ.އައި.އެން: <span class="val" contenteditable="true">1001234GST001</span></span>
           </div>
         </div>
       </div>
@@ -672,11 +672,11 @@
       <div class="invoice-label">
         <h1>
           <span class="en">INVOICE</span>
-          <span class="dv">ފައިސާގެ ބިލް</span>
+          <span class="dv">އިންވޮއިސް</span>
         </h1>
         <div class="meta">
           <div>
-            <span class="en">Invoice No:</span><span class="dv">ބިލް ނަންބަރު:</span>
+            <span class="en">Invoice No:</span><span class="dv">އިންވޮއިސް ނަންބަރު:</span>
             <span class="val" id="invoiceNo" contenteditable="true">INV-2026-001</span>
           </div>
           <div>
@@ -707,8 +707,8 @@
           <span class="dv" contenteditable="true">ކަސްޓަމަރުގެ ނަން / ކުންފުނީގެ ނަން</span>
         </div>
         <div class="addr-text">
-          <span class="en" contenteditable="true">M. Muli', Republic of Maldives<br>Phone: +960 999-0000<br>TIN: 1009999GST001</span>
-          <span class="dv" contenteditable="true">މ. މުލި، ދިވެހިރާއްޖެ<br>ފޯނު: 999-0000 960+<br>ޓީ.އައި.އެން: 1009999GST001</span>
+          <span class="en" contenteditable="true">Male', Republic of Maldives<br>Phone: +960 999-0000<br>TIN: 1009999GST001</span>
+          <span class="dv" contenteditable="true">މާލެ، ދިވެހިރާއްޖެ<br>ފޯނު: 999-0000 960+<br>ޓީ.އައި.އެން: 1009999GST001</span>
         </div>
       </div>
     </div>
@@ -742,8 +742,8 @@
             <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
           </td>
           <td>
-            <span class="en" contenteditable="true">Web Development Services</span>
-            <span class="dv" contenteditable="true">ވެބްސައިޓް ހެދުމުގެ ޚިދުމަތް</span>
+            <span class="en" contenteditable="true">Web Development & Hosting Services</span>
+            <span class="dv" contenteditable="true">ވެބްސައިޓް ހެދުމާއި ހޯސްޓިންގ ޚިދުމަތް</span>
           </td>
           <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
           <td class="num item-price" contenteditable="true" oninput="recalc()">3,500.00</td>
@@ -754,8 +754,8 @@
             <button class="btn-del-row" onclick="deleteRow(this)" title="Delete Row">✕</button>
           </td>
           <td>
-            <span class="en" contenteditable="true">Registration</span>
-            <span class="dv" contenteditable="true">ރަޖިސްޓްރޭޝަން</span>
+            <span class="en" contenteditable="true">Domain Name Registration (.mv - 1 Year)</span>
+            <span class="dv" contenteditable="true">ޑޮމެއިން ރަޖިސްޓްރޭޝަން (mv. - 1 އަހަރު)</span>
           </td>
           <td class="num item-qty" contenteditable="true" oninput="recalc()">1</td>
           <td class="num item-price" contenteditable="true" oninput="recalc()">500.00</td>
@@ -851,7 +851,7 @@
       </div>
       <div class="payment-row">
         <span class="k"><span class="en">Account No. (MVR)</span><span class="dv">އެކައުންޓް ނަންބަރު (ރުފިޔާ)</span></span>
-        <span class="v" contenteditable="true">000000000000</span>
+        <span class="v" contenteditable="true">7700 000000 001</span>
       </div>
     </div>
 
@@ -1181,6 +1181,60 @@
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
 
+    /* --- Cross-platform file saving (desktop / iPhone / Android) ---
+       Prefers the Claude artifact "downloads" capability (works uniformly
+       inside the Claude app/web on every platform); falls back to normal
+       browser download / share behavior if that capability isn't present
+       (e.g. the page opened directly outside the Claude runtime). */
+    let downloadsApiPromise = null;
+    function getDownloadsApi() {
+      if (!downloadsApiPromise) {
+        downloadsApiPromise = (window.claude && typeof window.claude.use === 'function')
+          ? window.claude.use('downloads').catch(() => null)
+          : Promise.resolve(null);
+      }
+      return downloadsApiPromise;
+    }
+
+    async function saveFile(filename, blob) {
+      const downloads = await getDownloadsApi();
+      if (downloads) {
+        try {
+          await downloads.save({ filename, data: blob });
+          return true;
+        } catch (err) {
+          if (err && err.code === 'declined') return false; // viewer said no; don't fall back
+          console.error('downloads.save failed, falling back', err);
+        }
+      }
+      // Legacy fallback for browsers outside the Claude artifact runtime
+      try {
+        if (isIOS()) {
+          const file = new File([blob], filename, { type: 'application/pdf' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: filename });
+            return true;
+          }
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank');
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+          return true;
+        }
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        return true;
+      } catch (err) {
+        console.error('Fallback save failed', err);
+        return false;
+      }
+    }
+
     function resetDownloadBtn() {
       const btn = document.getElementById('downloadBtn');
       btn.disabled = false;
@@ -1201,19 +1255,8 @@
         const pdf = await buildSinglePagePdf(el);
         document.body.classList.remove('rendering-pdf');
 
-        if (isIOS()) {
-          const blob = pdf.output('blob');
-          const file = new File([blob], filename, { type: 'application/pdf' });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: filename }).catch(() => {});
-          } else {
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
-            setTimeout(() => URL.revokeObjectURL(url), 60000);
-          }
-        } else {
-          pdf.save(filename);
-        }
+        const blob = pdf.output('blob');
+        await saveFile(filename, blob);
       } catch (err) {
         console.error(err);
       } finally {
@@ -1245,26 +1288,22 @@
         const blob = pdf.output('blob');
         const file = new File([blob], filename, { type: 'application/pdf' });
 
+        let sharedDirectly = false;
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            files: [file],
-            title: filename,
-            text: 'Invoice: ' + filename
-          }).catch(() => {});
-        } else {
-          const url = URL.createObjectURL(blob);
-          if (isIOS()) {
-            window.open(url, '_blank');
-          } else {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+          try {
+            await navigator.share({
+              files: [file],
+              title: filename,
+              text: 'Invoice: ' + filename
+            });
+            sharedDirectly = true;
+          } catch (err) {
+            // viewer cancelled the native share sheet, or it isn't usable here — fall back below
           }
-          setTimeout(() => URL.revokeObjectURL(url), 60000);
+        }
 
+        if (!sharedDirectly) {
+          await saveFile(filename, blob);
           const msg = encodeURIComponent('Invoice attached: ' + filename + ' (Please attach the downloaded PDF file)');
           window.open('https://wa.me/?text=' + msg, '_blank');
         }
